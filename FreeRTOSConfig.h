@@ -34,23 +34,17 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+
 /*############################# Added By Me #################################*/
+/*Good place to include files that are used by all */
 #include <stdint.h>
+#include "main.h"
+/*###########################################################################*/
 
 
-/* Set mainCREATE_SIMPLE_BLINKY_DEMO_ONLY to one to run the simple blinky demo,
-or 0 to run the more comprehensive test and demo application.
 
-The comprehensive demo uses FreeRTOS+CLI to create a simple command line
-interface through a UART.
 
-The blinky demo uses FreeRTOS's tickless idle mode to reduce power consumption.
-See the notes on the web page below regarding the difference in power saving
-that can be achieved between using the generic tickless implementation (as used
-by the blinky demo) and a tickless implementation that is tailored specifically
-to the CC3220.
-
-See http://www.FreeRTOS.org/TI_CC3220_SimpleLink_FreeRTOS_Demo.html for
+/*See http://www.FreeRTOS.org/TI_CC3220_SimpleLink_FreeRTOS_Demo.html for
 instructions. */
 #define configCREATE_SIMPLE_TICKLESS_DEMO	0
 
@@ -78,17 +72,17 @@ instructions. */
 /* Constants used to specify if only static allocation is to be supported (in
 which case a heap_n.c file is not required), only dynamic allocation is to be
 supported, or if both static and dynamic allocation are supported. */
-#define configSUPPORT_STATIC_ALLOCATION			0 // 0 then RTOS objects can be created using RAM that is automatically allocated from the FreeRTOS heap.
-#define configSUPPORT_DYNAMIC_ALLOCATION		1 // 1 then RTOS objects can be created using RAM that is automatically allocated from the FreeRTOS heap.
+
+#define configSUPPORT_STATIC_ALLOCATION			0
+
+// 1 then RTOS objects can be created using RAM that is automatically allocated from the FreeRTOS heap.
+#define configSUPPORT_DYNAMIC_ALLOCATION		1
 
 /* Constants that describe the hardware and memory usage. */
-#define configCPU_CLOCK_HZ						( ( unsigned long ) 80000000 )
+#define configCPU_CLOCK_HZ						( ( unsigned long ) SYSTEM_CLOCK )
 #define configMINIMAL_STACK_SIZE				( ( uint16_t ) 100 )
 #define configMAX_TASK_NAME_LEN					( 12 )
 
-/* Note heap_5.c is used so this only defines the part of the heap that is in
-the first block of RAM on the LPC device.  See the initialisation of the heap
-in main.c. */
 #define configTOTAL_HEAP_SIZE					( ( size_t ) ( 50 * 1024 ) )
 
 /* Constants that build features in or out. */
