@@ -16,8 +16,8 @@
 
 void I2C0_Master_Enable();
 
-uint8_t I2C0_Master_Read(uint8_t Slave_Addr);
+uint8_t I2C0_Master_Read(uint8_t Slave_Addr,uint8_t reg);
 
-void I2C0_Master_Write(uint8_t Slave_Addr,uint8_t DataTx);
+void I2C0_Master_Write(uint8_t Slave_Addr,uint8_t DataTx, uint8_t read_reg_addr);
 
 #endif /* MYI2C_H_ */

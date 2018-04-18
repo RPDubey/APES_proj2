@@ -51,6 +51,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.DIAG_WRAP.1875314300" name="Wrap diagnostic messages (--diag_wrap)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.DIAG_WRAP" value="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.DIAG_WRAP.off" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.INCLUDE_PATH.1563043958" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/MyIncludes}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/FreeRTOS/Source/include}"/>
 									<listOptionValue builtIn="false" value="${workspace_loc:/${ProjName}/FreeRTOS/Source/portable/CCS/ARM_CM4F}"/>
@@ -58,7 +59,7 @@
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.LITTLE_ENDIAN.579230242" name="Little endian code [See 'General' page to edit] (--little_endian, -me)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.LITTLE_ENDIAN" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.GEN_FUNC_SUBSECTIONS.321360625" name="Place each function in a separate subsection (--gen_func_subsections, -ms)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.GEN_FUNC_SUBSECTIONS" value="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.GEN_FUNC_SUBSECTIONS.on" valueType="enumerated"/>
-								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.OPT_LEVEL.1305973875" name="Optimization level (--opt_level, -O)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.OPT_LEVEL" value="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.OPT_LEVEL.2" valueType="enumerated"/>
+								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.OPT_LEVEL.1305973875" name="Optimization level (--opt_level, -O)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.OPT_LEVEL" value="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.OPT_LEVEL.off" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.UAL.134561997" name="Use unified assembly language (--ual)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compilerID.UAL" value="true" valueType="boolean"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compiler.inputType__C_SRCS.251152422" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compiler.inputType__CPP_SRCS.1777657893" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_5.2.compiler.inputType__CPP_SRCS"/>

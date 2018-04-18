@@ -25,23 +25,33 @@
 
 #include "MyTasks.h"
 #include "MyUart.h"
+#include "common.h"
+
 
 #define STACK_DEPTH           1024 //1024 words
 #define TICKS_PER_SECOND      1000
 
-#define SLAVE_ADDRESS         0x3C
-#define NUM_I2C_DATA          3
+
+//#define RGB
+#define ZX
 
 uint32_t g_ui32SysClock;
 
 static void vTimer2hzCallbackFunction(TimerHandle_t xTimer)
 {
+#ifdef ZX
+    vTaskResume(ZXHandle);
+#endif
+
+#ifdef RGB
     vTaskResume(RGBHandle);
+#endif
+
+
 }
 
 int main(void)
 {
-
     //set clock frequency to 120 MHZ
     g_ui32SysClock = MAP_SysCtlClockFreqSet(
             (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL
@@ -52,6 +62,9 @@ int main(void)
     TickType_t Ticks2hz = pdMS_TO_TICKS(TICKS_PER_SECOND/ulFrequency2hz);
 
     UART0Enable();
+    UARTStdioConfig(0, 115200, g_ui32SysClock);
+
+    I2C0_Master_Enable();
 
     TimerHandle_t Timer2hz;
     Timer2hz = xTimerCreate("Timer 2 HZ", Ticks2hz,
@@ -60,14 +73,26 @@ int main(void)
     configASSERT(Timer2hz != NULL);
     xTimerStart(Timer2hz, 0);
 
+
+
+    UARTprintf("\nStart Program");
+
+
     //create Task
     BaseType_t ret;
 
+#ifdef RGB
     ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
     configASSERT(ret == pdPASS);
+#endif
 
-    UARTSend((uint8_t *) "\nStart Scheduler", 15);
+#ifdef ZX
+    ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, NULL, 1, &ZXHandle);
+       configASSERT(ret == pdPASS);
+#endif
+
     vTaskStartScheduler();
+
 
     while (1)
         ;
