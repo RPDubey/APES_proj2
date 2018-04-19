@@ -32,8 +32,87 @@
 #define TICKS_PER_SECOND      1000
 
 
-//#define RGB
-#define ZX
+#define RGB
+//#define ZX
+
+
+void PortCIntHandler(void){
+    uint32_t read = 0x00;
+    static uint32_t flag =0;
+
+
+    read = GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_3);
+
+    if(!read)
+{
+    UARTprintf("\nHello World: %X",read);
+    SysCtlDelay(1000);//debounce
+}
+
+    GPIOIntClear(GPIO_PORTL_BASE, GPIO_INT_PIN_3);
+
+}
+
+
+
+    GPIOInterruptEnable(){
+        //int32_t i32Val;
+        //
+        // Enable the GPIOA peripheral
+        //
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
+        //
+        // Wait for the GPIOA module to be ready.
+        //
+        while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+        //
+        // Register the port-level interrupt handler. This handler is the first
+        // level interrupt handler for all the pin interrupts.
+        //
+        GPIOIntRegister(GPIO_PORTL_BASE, PortCIntHandler);
+        //
+        // Initialize the GPIO pin configuration.
+        //
+        // Set pins 2, 4, and 5 as input, SW controlled.
+        //
+        GPIOPinTypeGPIOInput(GPIO_PORTL_BASE, GPIO_PIN_3);
+//        //
+//        // Set pins 0 and 3 as output, SW controlled.
+//        //
+//        GPIOPinTypeGPIOOutput(GPIO_PORTC_BASE, GPIO_PIN_6);
+//        //
+//        // Make pins 2 and 4 rising edge triggered interrupts.
+//        //
+//        GPIOIntTypeSet(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_4, GPIO_RISING_EDGE);
+        //
+        // Make pin 7 high level triggered interrupts.
+        //
+        GPIOIntTypeSet(GPIO_PORTL_BASE, GPIO_PIN_3, GPIO_FALLING_EDGE);
+        //
+        // Read some pins.
+        //
+
+//        i32Val = GPIOPinRead(GPIO_PORTA_BASE,
+//        (GPIO_PIN_0 | GPIO_PIN_2 | GPIO_PIN_3 |
+//        GPIO_PIN_4 | GPIO_PIN_5));
+//        //
+//        // Write some pins. Even though pins 2, 4, and 5 are specified, those pins
+//        // are unaffected by this write because they are configured as inputs. At
+//        // the end of this write, pin 0 is low, and pin 3 is high.
+//        //
+ //       GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_6, 1);
+
+        //
+        // Enable the pin interrupts.
+        //
+
+        GPIOIntEnable(GPIO_PORTL_BASE, GPIO_PIN_3 );
+
+
+
+    }
+
+
 
 uint32_t g_ui32SysClock;
 
@@ -63,6 +142,10 @@ int main(void)
 
     UART0Enable();
     UARTStdioConfig(0, 115200, g_ui32SysClock);
+
+    GPIOInterruptEnable();
+
+
 
     I2C0_Master_Enable();
 

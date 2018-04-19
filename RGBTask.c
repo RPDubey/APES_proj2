@@ -107,16 +107,17 @@ void RGBTask(void* pvParameters)
     uint8_t read_val;
     RGB_SENSOR_REG_t reg, reg1, reg2;
 
-//    //reset
-//    reg = DEVICE_ID;
-//    RGB_SENSOR_WRITE(0x46,reg);
+    //reset
+    reg = DEVICE_ID;
+    RGB_SENSOR_WRITE(0x46,reg);
+    SysCtlDelay(1000);
 
-
-
+//check for device id
+  //  UARTprintf("\nConfig1:%x",RGB_SENSOR_READ(reg));
 
     //configuration
     reg = CONFIG_1;
-    RGB_SENSOR_WRITE(CFG1_MODE_RGB | CFG1_10KLUX | CFG1_16BIT | CFG1_ADC_SYNC_NORMAL,reg);
+    RGB_SENSOR_WRITE(CFG1_MODE_RGB | CFG1_10KLUX | CFG1_ADC_SYNC_NORMAL,reg);//| CFG1_16BIT
     UARTprintf("\nConfig1:%x",RGB_SENSOR_READ(reg));
 
     reg = CONFIG_2;
@@ -124,8 +125,15 @@ void RGBTask(void* pvParameters)
     UARTprintf("\nConfig2:%x",RGB_SENSOR_READ(reg));
 
     reg = CONFIG_3;
-    RGB_SENSOR_WRITE(CFG3_NO_INT | CFG3_INT_PRST1 | CFG3_RGB_CONV_TO_INT_DISABLE,reg);
+    RGB_SENSOR_WRITE(CFG3_R_INT | CFG3_INT_PRST4 | CFG3_RGB_CONV_TO_INT_DISABLE,reg);
     UARTprintf("\nConfig3:%x",RGB_SENSOR_READ(reg));
+
+//set interrupt threshold
+    //low threshold defaults to 0
+    reg1 = THRESHOLD_HH;reg2 = THRESHOLD_HL;
+    RGB_SENSOR_WRITE(0,reg1);RGB_SENSOR_WRITE(0x80,reg2);
+    UARTprintf("\nThreshold HIGH:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
+
 
 
     for (;;)
@@ -137,15 +145,17 @@ void RGBTask(void* pvParameters)
 
         read_val = 69;
 
+       reg = STATUS;
+       UARTprintf("  STATUS:%x",RGB_SENSOR_READ(reg));
 
        reg1 = RED_H; reg2 = RED_L;
-       UARTprintf("  RED:%x%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
+       UARTprintf("  RED:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
 
        reg1 = GREEN_H; reg2 = GREEN_L;
-       UARTprintf("  GREEN:%x%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
+       UARTprintf("  GREEN:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
 
        reg1 = BLUE_H; reg2 = BLUE_L;
-       UARTprintf("  BLUE:%x%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
+       UARTprintf("  BLUE:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
 
 
     }
