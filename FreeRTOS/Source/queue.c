@@ -1108,7 +1108,8 @@ Queue_t * const pxQueue = ( Queue_t * ) xQueue;
 	safe API to ensure interrupt entry is as fast and as simple as possible.
 	More information (albeit Cortex-M specific) is provided on the following
 	link: http://www.freertos.org/RTOS-Cortex-M3-M4.html */
-	portASSERT_IF_INTERRUPT_PRIORITY_INVALID();
+/*********************************************************************************/
+//	portASSERT_IF_INTERRUPT_PRIORITY_INVALID();//I have disabled it for testing
 
 	uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 	{

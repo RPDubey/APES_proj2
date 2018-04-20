@@ -8,6 +8,8 @@
 
 #include "MyTasks.h"
 #include "utils/uartstdio.h"
+#include "common.h"
+
 
 #define ZX_SENSOR_ADDR           0x10
 
@@ -16,7 +18,7 @@
 
 
 typedef enum{
-    STATUS =    0x00,
+    ZX_STATUS =    0x00,
     DRE    =    0x01,
     DRCFG  =    0x02,
     GESTURE=    0x04,
@@ -61,18 +63,29 @@ void ZXTask(void* pvParameters)
     read_val =  ZX_SENSOR_READ(reg);
     UARTprintf("\nDRCFG:%x",read_val);
 
+    uint32_t NotificationVal = 0x00;
+    BaseType_t ret;
 
     for (;;)
     {
 
-        vTaskSuspend(ZXHandle);
+        //vTaskSuspend(ZXHandle);
+//        ret = xTaskNotifyWait(0xFFFFFFFF, //ulBitsToClearOnEntry if no pending signal - clear all bits
+//                   NotificationVal, //ulBitsToClearOnExit - clear the Notification rxd,
+//                   &NotificationVal,  //pulNotificationValue,
+//                   portMAX_DELAY);    //xTicksToWait
+//        configASSERT(ret == pdTRUE);
+
+
+  xSemaphoreTake(xSemaphore, portMAX_DELAY  );
+
         led_state = !led_state;
         LED_PFO_ON_OFF(led_state);
 
 
     //   UARTprintf("\n");
 
-       reg = STATUS;
+       reg = ZX_STATUS;
        status =  ZX_SENSOR_READ(reg);
 //       UARTprintf("Status:%x",status);
 
