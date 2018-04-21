@@ -17,7 +17,7 @@ void RGBTask(void* pvParameters)
     uint32_t led_state = GPIO_PIN_OFF;
     uint8_t read_val;
     RGB_SENSOR_REG_t reg, reg1, reg2;
-
+/*
     //reset
     reg = DEVICE_ID;
     RGB_SENSOR_WRITE(0x46,reg);
@@ -49,13 +49,14 @@ void RGBTask(void* pvParameters)
     RGB_SENSOR_WRITE(0x00,reg1);RGB_SENSOR_WRITE(0xFF,reg2);
     UARTprintf("\nThreshold HIGH:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
 
-
+*/
 
     for (;;)
     {
         vTaskSuspend(RGBHandle);
         led_state = !led_state;
         LED_PFO_ON_OFF(led_state);
+ /*
         UARTprintf("\n");
 
         read_val = 69;
@@ -71,7 +72,7 @@ void RGBTask(void* pvParameters)
 
        reg1 = BLUE_H; reg2 = BLUE_L;
        UARTprintf("  BLUE:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
-
+*/
 
     }
 
