@@ -41,8 +41,8 @@
 // performance.
 //
 //*****************************************************************************
-#define NUM_TX_DESCRIPTORS 3
-#define NUM_RX_DESCRIPTORS 3
+#define NUM_TX_DESCRIPTORS 10
+#define NUM_RX_DESCRIPTORS 10
 tEMACDMADescriptor g_psRxDescriptor[NUM_TX_DESCRIPTORS];
 tEMACDMADescriptor g_psTxDescriptor[NUM_RX_DESCRIPTORS];
 uint32_t g_ui32RxDescIndex;
@@ -56,6 +56,180 @@ uint32_t g_ui32TxDescIndex;
 //*****************************************************************************
 #define RX_BUFFER_SIZE 1536
 uint8_t g_ppui8RxBuffer[NUM_RX_DESCRIPTORS][RX_BUFFER_SIZE];
+
+//*****************************************************************************
+//
+// The deferred interrupt handler is a standard RTOS task for handling
+// Rxd Packets
+//
+//*****************************************************************************
+
+TaskHandle_t PacketRxTask;
+
+static void prvEMACDeferredInterruptHandlerTask( void *pvParameters )
+{
+NetworkBufferDescriptor_t *pxBufferDescriptor;
+size_t xBytesReceived;
+
+/* Used to indicate that xSendEventStructToIPTask() is being called because
+of an Ethernet receive event. */
+IPStackEvent_t xRxEvent;
+
+    for( ;; )
+    {
+        /* Wait for the Ethernet MAC interrupt to indicate that another packet
+        has been received.  The task notification is used in a similar way to a
+        counting semaphore to count Rx events, but is a lot more efficient than
+        a semaphore. */
+        ulTaskNotifyTake( pdFALSE, portMAX_DELAY );
+
+        /* See how much data was received.*/
+        xBytesReceived =  ( (g_psRxDescriptor[g_ui32RxDescIndex].ui32CtrlStatus &
+                              DES0_RX_STAT_FRAME_LENGTH_M) >>
+                              DES0_RX_STAT_FRAME_LENGTH_S );
+
+
+        if( xBytesReceived > 0 )
+        {
+            /* Allocate a network buffer descriptor that points to a buffer
+            large enough to hold the received frame.  As this is the simple
+            rather than efficient example the received data will just be copied
+            into this buffer. */
+            pxBufferDescriptor = pxGetNetworkBufferWithDescriptor( xBytesReceived, 0 );
+
+            if( pxBufferDescriptor != NULL )
+            {
+                /* pxBufferDescriptor->pucEthernetBuffer now points to an Ethernet
+                buffer large enough to hold the received data.  Copy the
+                received data into pcNetworkBuffer->pucEthernetBuffer.  Here it
+                is assumed ReceiveData() is a peripheral driver function that
+                copies the received data into a buffer passed in as the function's
+                parameter.*/
+
+              pxBufferDescriptor->xDataLength = xBytesReceived;
+              configASSERT( memcpy( (void*)(pxBufferDescriptor->pucEthernetBuffer),
+                                    (void*)(g_psRxDescriptor[g_ui32RxDescIndex].pvBuffer1),
+                                    xBytesReceived ) != NULL);
+
+              // Now that we are finished dealing with this descriptor, hand
+              // it back to the hardware
+              g_psRxDescriptor[g_ui32RxDescIndex].ui32CtrlStatus = DES0_RX_CTRL_OWN;
+              //
+              // Move on to the next descriptor in the chain.
+              //
+              g_ui32RxDescIndex++;
+
+              if(g_ui32RxDescIndex == NUM_RX_DESCRIPTORS)
+              {
+              g_ui32RxDescIndex = 0;
+              }
+
+                /* See if the data contained in the received Ethernet frame needs
+                to be processed.  NOTE! It is preferable to do this in
+                the interrupt service routine itself, which would remove the need
+                to unblock this task for packets that don't need processing. */
+                if( eConsiderFrameForProcessing( pxBufferDescriptor->pucEthernetBuffer )
+                                                                      == eProcessBuffer )
+                {
+                    /* The event about to be sent to the TCP/IP is an Rx event. */
+                    xRxEvent.eEventType = eNetworkRxEvent;
+
+                    /* pvData is used to point to the network buffer descriptor that
+                    now references the received data. */
+                    xRxEvent.pvData = ( void * ) pxBufferDescriptor;
+
+                    /* Send the data to the TCP/IP stack. */
+                    if( xSendEventStructToIPTask( &xRxEvent, 0 ) == pdFALSE )
+                    {
+                        /* The buffer could not be sent to the IP task so the buffer
+                        must be released. */
+                        vReleaseNetworkBufferAndDescriptor( pxBufferDescriptor );
+
+                        /* Make a call to the standard trace macro to log the
+                        occurrence. */
+                        iptraceETHERNET_RX_EVENT_LOST();
+                    }
+                    else
+                    {
+                        /* The message was successfully sent to the TCP/IP stack.
+                        Call the standard trace macro to log the occurrence. */
+                        iptraceNETWORK_INTERFACE_RECEIVE();
+                    }
+                }
+                else
+                {
+                    /* The Ethernet frame can be dropped, but the Ethernet buffer
+                    must be released. */
+                    vReleaseNetworkBufferAndDescriptor( pxBufferDescriptor );
+                }
+            }
+            else
+            {
+                /* The event was lost because a network buffer was not available.
+                Call the standard trace macro to log the occurrence. */
+                iptraceETHERNET_RX_EVENT_LOST();
+            }
+        }
+    }
+}
+
+
+
+//*****************************************************************************
+//
+// The interrupt handler for the Ethernet interrupt.
+//
+//*****************************************************************************
+void
+EthernetIntHandler(void)
+{
+uint32_t ui32Temp;
+//
+// Read and Clear the interrupt.
+//
+ui32Temp = EMACIntStatus(EMAC0_BASE, true);
+EMACIntClear(EMAC0_BASE, ui32Temp);
+//
+// Check to see if an RX Interrupt has occurred.
+//
+if(ui32Temp & EMAC_INT_RECEIVE)
+{
+    //
+    // Make sure that we own the receive descriptor.
+    //
+    if(!(g_psRxDescriptor[g_ui32RxDescIndex].ui32CtrlStatus & DES0_RX_CTRL_OWN))
+    {
+    //
+    // We own the receive descriptor so check to see if it contains a valid
+    // frame.
+    //
+    if(!(g_psRxDescriptor[g_ui32RxDescIndex].ui32CtrlStatus &
+    DES0_RX_STAT_ERR))
+    {
+    //
+    // We have a valid frame. First check that the "last descriptor"
+    // flag is set. We sized the receive buffer such that it can
+    // always hold a valid frame so this flag should never be clear at
+    // this point but...
+    //
+    if(g_psRxDescriptor[g_ui32RxDescIndex].ui32CtrlStatus &
+    DES0_RX_STAT_LAST_DESC)
+    {
+
+     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    /* Unblock the handling task so the task can perform any processing necessitated
+       by the interrupt.  xHandlingTask is the task's handle, which was obtained
+       when the task was created. */
+       vTaskNotifyGiveFromISR( PacketRxTask, &xHigherPriorityTaskWoken );
+
+
+    }
+    }
+    }
+}
+}
+
 
 
 
@@ -110,7 +284,7 @@ return(i32BufLen);
 }
 
 
-
+/**  sends data received from the embedded TCP/IP stack to the Ethernet MAC driver for transmission **/
 
 BaseType_t xNetworkInterfaceOutput( NetworkBufferDescriptor_t * const pxNetworkBuffer, BaseType_t xReleaseAfterSend ){
 
@@ -163,6 +337,7 @@ g_psTxDescriptor[ui32Loop].ui32Count = DES1_TX_CTRL_SADDR_INSERT;
 g_psTxDescriptor[ui32Loop].DES3.pLink =
 (ui32Loop == (NUM_TX_DESCRIPTORS - 1)) ?
 g_psTxDescriptor : &g_psTxDescriptor[ui32Loop + 1];
+
 g_psTxDescriptor[ui32Loop].ui32CtrlStatus =
 (DES0_TX_CTRL_LAST_SEG | DES0_TX_CTRL_FIRST_SEG |
 DES0_TX_CTRL_INTERRUPT | DES0_TX_CTRL_CHAINED |
@@ -239,6 +414,7 @@ pui8MACAddr[5] = ((ui32User1 >> 16) & 0xff);
 //
 SysCtlPeripheralEnable(SYSCTL_PERIPH_EMAC0);
 SysCtlPeripheralEnable(SYSCTL_PERIPH_EPHY0);
+
 SysCtlPeripheralReset(SYSCTL_PERIPH_EMAC0);
 SysCtlPeripheralReset(SYSCTL_PERIPH_EPHY0);
 //
@@ -287,7 +463,7 @@ InitDescriptors(EMAC0_BASE);
 //
 // Program the hardware with its MAC address (for filtering).
 //
-EMACAddrSet(EMAC0_BASE, 0, pui8MACAddr);
+EMACAddrSet(EMAC0_BASE, 0, (uint8_t *)pui8MACAddr);
 //
 // Wait for the link to become active.
 //
@@ -314,9 +490,25 @@ for(ui32Loop = 0; ui32Loop < NUM_RX_DESCRIPTORS; ui32Loop++)
 {
 g_psRxDescriptor[ui32Loop].ui32CtrlStatus |= DES0_RX_CTRL_OWN;
 }
+
+
+//
+//Create Task to Handle Received Packets
+//
+
+BaseType_t ret = xTaskCreate(prvEMACDeferredInterruptHandlerTask,
+                             "Packet Receive Task",
+                             configMINIMAL_STACK_SIZE*10, NULL,
+                             configMAX_PRIORITIES - 1,
+                             &PacketRxTask);
+
+
+if(ret == pdFAIL) return pdFAIL;
+
 //
 // Enable the Ethernet MAC transmitter and receiver.
 //
+IntPrioritySet(INT_EMAC0_TM4C129, 0xE0);
 EMACTxEnable(EMAC0_BASE);
 EMACRxEnable(EMAC0_BASE);
 //

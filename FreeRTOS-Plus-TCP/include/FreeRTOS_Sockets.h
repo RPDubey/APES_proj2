@@ -63,7 +63,7 @@ extern "C" {
 #endif
 
 /* Standard includes. */
-#include <string.h>
+#include <stdio.h>
 
 /* Application level configuration options. */
 #include "FreeRTOSIPConfig.h"
@@ -199,6 +199,8 @@ struct freertos_sockaddr
 	uint16_t sin_port;
 	uint32_t sin_addr;
 };
+
+//typedef freertos_sockaddr freertos_sockaddr;
 
 #if ipconfigBYTE_ORDER == pdFREERTOS_LITTLE_ENDIAN
 

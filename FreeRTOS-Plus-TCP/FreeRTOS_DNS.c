@@ -57,6 +57,7 @@
 
 /* Standard includes. */
 #include <stdint.h>
+#include <string.h>
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"

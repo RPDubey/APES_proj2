@@ -63,8 +63,8 @@ void ZXTask(void* pvParameters)
     read_val =  ZX_SENSOR_READ(reg);
     UARTprintf("\nDRCFG:%x",read_val);
 
-    uint32_t NotificationVal = 0x00;
-    BaseType_t ret;
+//    uint32_t NotificationVal = 0x00;
+//    BaseType_t ret;
 
     for (;;)
     {

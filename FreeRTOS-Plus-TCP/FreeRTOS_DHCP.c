@@ -809,7 +809,10 @@ const uint32_t ulMandatoryOptions = 2ul; /* DHCP server address, and the correct
 				{
 					/* HT:endian: used to be network order */
 					xDHCPData.ulOfferedIPAddress = pxDHCPMessage->ulYourIPAddress_yiaddr;
-					FreeRTOS_printf( ( "vDHCPProcess: offer %lxip\n", FreeRTOS_ntohl( xDHCPData.ulOfferedIPAddress ) ) );
+					FreeRTOS_printf( ( "\nvDHCPProcess: offer %lxip\n", FreeRTOS_ntohl( xDHCPData.ulOfferedIPAddress ) ) );
+					int8_t cBuffer[16];
+					FreeRTOS_inet_ntoa(xDHCPData.ulOfferedIPAddress, cBuffer);
+//					UARTprintf("IP Address***: %s\r\n", cBuffer);
 					xReturn = pdPASS;
 				}
 			}

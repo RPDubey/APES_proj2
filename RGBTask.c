@@ -15,9 +15,12 @@ void RGBTask(void* pvParameters)
 
     LED_PF0_SETUP
     uint32_t led_state = GPIO_PIN_OFF;
-    uint8_t read_val;
-    RGB_SENSOR_REG_t reg, reg1, reg2;
-/*
+//    uint8_t read_val;
+//    RGB_SENSOR_REG_t reg, reg1, reg2;
+
+
+
+    /*
     //reset
     reg = DEVICE_ID;
     RGB_SENSOR_WRITE(0x46,reg);

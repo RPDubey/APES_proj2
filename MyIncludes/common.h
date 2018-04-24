@@ -11,4 +11,8 @@
 //#define TEST
 #undef  TEST
 
+
+#define STACK_DEPTH           1024 //1024 words
+
+
 #endif /* MYINCLUDES_COMMON_H_ */

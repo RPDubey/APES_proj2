@@ -58,7 +58,7 @@
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
-
+#include <string.h>
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
