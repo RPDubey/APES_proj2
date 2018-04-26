@@ -114,6 +114,11 @@ IPStackEvent_t xRxEvent;
               // Now that we are finished dealing with this descriptor, hand
               // it back to the hardware
               g_psRxDescriptor[g_ui32RxDescIndex].ui32CtrlStatus = DES0_RX_CTRL_OWN;
+
+
+
+
+
               //
               // Move on to the next descriptor in the chain.
               //

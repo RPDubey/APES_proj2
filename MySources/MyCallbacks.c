@@ -16,7 +16,7 @@
 #include "MySocket.h"
 #include "common.h"
 
-/* Defined by the application code, but called by FreeRTOS+UDP when the network
+/* Defined by the application code, but called by FreeRTOS when the network
  connects/disconnects (if ipconfigUSE_NETWORK_EVENT_HOOK is set to 1 in
  FreeRTOSIPConfig.h). */
 void vApplicationIPNetworkEventHook(eIPCallbackEvent_t eNetworkEvent)

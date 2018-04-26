@@ -52,23 +52,23 @@ void SocketServerTask(void* pvParameters)
     /* Set the listening port to PORT. */
     xBindAddress.sin_port = (uint16_t) PORT;
     xBindAddress.sin_port = FreeRTOS_htons(xBindAddress.sin_port);
-//    xBindAddress.sin_family = FREERTOS_AF_INET;
-//    xBindAddress.sin_addr = FreeRTOS_inet_addr_quick(192, 168, 1, 13);
 
     /* Bind the socket to the port that the client RTOS task will send to. */
+    /*When a socket is created it assumes the IP address of the network node that created it.*/
     ret = FreeRTOS_bind(xListeningSocket,
                        (struct freertos_sockaddr *)&xBindAddress,
                        sizeof(xBindAddress));
     configASSERT(ret == 0);        //0 for success
-
+    UARTprintf("\nServer Bound to host adddr and port %d\n",PORT);
     /* Set the socket into a listening state so it can accept connections.
      The maximum number of simultaneous connections is limited to 20. */
     ret = FreeRTOS_listen(xListeningSocket, xBacklog);
     configASSERT( ret == 0);
 
-    UARTprintf("\nServer Socket Placed in Listening state");
+    UARTprintf("\nServer Socket Placed in Listening state\n");
+
     /* Wait for incoming connections. */
-    xConnectedSocket = FreeRTOS_accept(xListeningSocket, &xClient, &xSize);
+      xConnectedSocket = FreeRTOS_accept(xListeningSocket, &xClient, &xSize);
     configASSERT(xConnectedSocket != FREERTOS_INVALID_SOCKET);
 
     UARTprintf("\nAccepted Connection in Server");

@@ -112,9 +112,9 @@ int main(void)
                             0, vTimer2hzCallbackFunction);
     configASSERT(Timer2hz != NULL);
     xTimerStart(Timer2hz, 0);
+    BaseType_t ret;
 
-
-
+//#ifdef socket
     /*############################################################################*/
     /* The MAC address array is not declared const as the MAC address will
      normally be read from an EEPROM and not hard coded (in real deployed
@@ -134,26 +134,12 @@ int main(void)
     /* Initialise the RTOS's TCP/IP stack.  The tasks that use the network
      are created in the vApplicationIPNetworkEventHook() hook function
      below.  The hook function is called when the network connects. */
-    BaseType_t ret;
+
     ret = FreeRTOS_IPInit(ucIPAddress, ucNetMask,
                           ucGatewayAddress,ucDNSServerAddress, ucMACAddress);
     configASSERT(ret == pdPASS);
     SysCtlDelay(1000);
     UARTprintf("Initialized TCP/IP Stack\n");
-
-//    ret = xTaskCreate(SocketServerTask, "Server Task", STACK_DEPTH, NULL, 1,
-//                       NULL);
-//    configASSERT(ret == pdPASS);
-//
-//    SysCtlDelay(10000);
-
-//    ret = xTaskCreate(SocketClientTask, "Client Task", STACK_DEPTH, NULL, 1,
-//                       NULL);
-//    configASSERT(ret == pdPASS);
-
-    //#ifdef ZX
-//    ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, NULL, 2, &ZXHandle);
-//    configASSERT(ret == pdPASS);
 //#endif
 
 #ifdef RGB
@@ -161,11 +147,17 @@ int main(void)
     configASSERT(ret == pdPASS);
 #endif
 
+//#ifdef ZX
+//    ret = xTaskCreate(ZXTask, "RGB Task", STACK_DEPTH, NULL, 2, &RGBHandle);
+//    configASSERT(ret == pdPASS);
+//#endif
+
+
     vTaskStartScheduler();
 
     while (1)
         ;
-    return 0;
+
 }
 
 

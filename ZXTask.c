@@ -69,12 +69,6 @@ void ZXTask(void* pvParameters)
     for (;;)
     {
 
-        //vTaskSuspend(ZXHandle);
-//        ret = xTaskNotifyWait(0xFFFFFFFF, //ulBitsToClearOnEntry if no pending signal - clear all bits
-//                   NotificationVal, //ulBitsToClearOnExit - clear the Notification rxd,
-//                   &NotificationVal,  //pulNotificationValue,
-//                   portMAX_DELAY);    //xTicksToWait
-//        configASSERT(ret == pdTRUE);
 
 
   xSemaphoreTake(xSemaphore, portMAX_DELAY  );
