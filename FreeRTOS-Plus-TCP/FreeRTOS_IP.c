@@ -1677,7 +1677,7 @@ uint8_t ucProtocol;
 		}
 
 		/* Call back into the application to pass it the result. */
-		vApplicationPingReplyHook( eStatus, pxICMPPacket->xICMPHeader.usIdentifier );
+		//vApplicationPingReplyHook( eStatus, pxICMPPacket->xICMPHeader.usIdentifier );
 	}
 
 #endif

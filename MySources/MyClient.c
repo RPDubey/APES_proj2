@@ -60,7 +60,7 @@ UARTprintf("\nClient Created and bound to port\n");
 #if (ipconfigUSE_DHCP == 0 )
     xRemoteAddress.sin_addr = FreeRTOS_inet_addr_quick(10,10,10,200);//static address
 #else
-    xRemoteAddress.sin_addr = FreeRTOS_inet_addr_quick(127,0,0,1);//gets assigned by the dhcp on routerFreeRTOS_inet_addr_quick(192,168,1,13)
+    xRemoteAddress.sin_addr = FreeRTOS_inet_addr_quick(192,168,0,38);//gets assigned by the dhcp on routerFreeRTOS_inet_addr_quick(192,168,1,13)
 #endif
 
     ret = FreeRTOS_connect(xClientSocket, &xRemoteAddress,
@@ -119,10 +119,10 @@ void SocketTask(void* pvParameters)
     configASSERT(ret == pdPASS);
 // UARTprintf("\nServer Task created ");
 
-    ret = xTaskCreate(SocketClientTask, "Client Task", STACK_DEPTH, NULL, 1,
-    NULL);
-    configASSERT(ret == pdPASS);
-//    UARTprintf("\nClient Task created");
+//    ret = xTaskCreate(SocketClientTask, "Client Task", STACK_DEPTH, NULL, 1,
+//    NULL);
+//    configASSERT(ret == pdPASS);
+//   // UARTprintf("\nClient Task created");
 
     while (1)
     {

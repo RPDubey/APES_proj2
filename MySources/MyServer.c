@@ -58,18 +58,21 @@ void SocketServerTask(void* pvParameters)
     ret = FreeRTOS_bind(xListeningSocket,
                        (struct freertos_sockaddr *)&xBindAddress,
                        sizeof(xBindAddress));
+    SysCtlDelay(1000);
     configASSERT(ret == 0);        //0 for success
     UARTprintf("\nServer Bound to host adddr and port %d\n",PORT);
     /* Set the socket into a listening state so it can accept connections.
      The maximum number of simultaneous connections is limited to 20. */
     ret = FreeRTOS_listen(xListeningSocket, xBacklog);
+    SysCtlDelay(1000);
     configASSERT( ret == 0);
 
     UARTprintf("\nServer Socket Placed in Listening state\n");
 
     /* Wait for incoming connections. */
       xConnectedSocket = FreeRTOS_accept(xListeningSocket, &xClient, &xSize);
-    configASSERT(xConnectedSocket != FREERTOS_INVALID_SOCKET);
+      SysCtlDelay(1000);
+      configASSERT(xConnectedSocket != FREERTOS_INVALID_SOCKET);
 
     UARTprintf("\nAccepted Connection in Server");
     static char cRxedData = 'P';

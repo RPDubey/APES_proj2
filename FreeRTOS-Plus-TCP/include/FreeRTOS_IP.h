@@ -66,7 +66,7 @@ extern "C" {
 #include "FreeRTOSIPConfig.h"
 #include "FreeRTOSIPConfigDefaults.h"
 #include "IPTraceMacroDefaults.h"
-
+#include<FreeRTOSIPConfig.h>
 /* Some constants defining the sizes of several parts of a packet */
 #define ipSIZE_OF_ETH_HEADER			14u
 #define ipSIZE_OF_IPv4_HEADER			20u
