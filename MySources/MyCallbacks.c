@@ -54,7 +54,7 @@ void vApplicationIPNetworkEventHook(eIPCallbackEvent_t eNetworkEvent)
        created. */
        if( xTasksAlreadyCreated == pdFALSE )
        {
-           xTasksAlreadyCreated = xTaskCreate(SocketTask, "Socket Task", STACK_DEPTH, NULL, 1,
+           xTasksAlreadyCreated = xTaskCreate(SocketTask, "Socket Task", STACK_DEPTH, NULL, 2,
                                 NULL);
            configASSERT(xTasksAlreadyCreated == pdPASS);
        }

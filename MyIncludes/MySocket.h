@@ -8,7 +8,7 @@
 #ifndef MYINCLUDES_MYSOCKET_H_
 #define MYINCLUDES_MYSOCKET_H_
 
-#define PORT 80
+#define PORT 100
 
 void SocketServerTask(void* pvParameters);
 void SocketClientTask(void* pvParameters);
