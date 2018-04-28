@@ -11,7 +11,7 @@
 #define PORT 100
 
 void SocketServerTask(void* pvParameters);
-void SocketClientTask(void* pvParameters);
+void COMSocketClientTask(void* pvParameters);
 void SocketTask(void* pvParameters);
 
 #endif /* MYINCLUDES_MYSOCKET_H_ */

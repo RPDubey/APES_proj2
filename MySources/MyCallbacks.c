@@ -14,6 +14,7 @@
 #include <FreeRTOS_IP.h>
 #include <FreeRTOS_Sockets.h>
 #include "MySocket.h"
+
 #include "common.h"
 
 /* Defined by the application code, but called by FreeRTOS when the network
@@ -54,9 +55,14 @@ void vApplicationIPNetworkEventHook(eIPCallbackEvent_t eNetworkEvent)
        created. */
        if( xTasksAlreadyCreated == pdFALSE )
        {
-           xTasksAlreadyCreated = xTaskCreate(SocketTask, "Socket Task", STACK_DEPTH, NULL, 2,
-                                NULL);
+
+           xTasksAlreadyCreated = xTaskCreate(COMSocketClientTask, "Client Task", STACK_DEPTH, NULL, 1,
+             NULL);
            configASSERT(xTasksAlreadyCreated == pdPASS);
+
+//           xTasksAlreadyCreated = xTaskCreate(SocketTask, "Socket Task", STACK_DEPTH, NULL, 2,
+//                                NULL);
+//           configASSERT(xTasksAlreadyCreated == pdPASS);
        }
 
     }
