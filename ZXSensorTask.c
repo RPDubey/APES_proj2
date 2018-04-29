@@ -47,9 +47,18 @@ typedef enum
 #define HVRMV_GESTURE_AVAILABLE 0x10
 
 extern SemaphoreHandle_t ZX_sem ;
+extern QueueHandle_t ZX_Que;
 
 void ZXSensorTask(void* pvParameters)
 {
+    BaseType_t ret;
+    xSemaphoreTake(ZX_sem, portMAX_DELAY  );
+
+
+ /***buffer for tx/rx data*****/
+   msg_struct *tx_buf = (msg_struct*)pvPortMalloc(PACKET_SIZE);
+   configASSERT(tx_buf != NULL);
+   tx_buf->dev_ID = DEV_ID;
 
 #ifndef TEST
     LED_PF0_SETUP
@@ -70,29 +79,26 @@ void ZXSensorTask(void* pvParameters)
     ZX_SENSOR_WRITE((uint8_t )(read_val & 0x7F), reg);
     read_val = ZX_SENSOR_READ(reg);
     UARTprintf("\nDRCFG:%x", read_val);
-#else
-    xSemaphoreTake(ZX_sem, portMAX_DELAY  );
-    UARTprintf("\nZX sem taken");
-    UARTprintf("\nZX initialization done");
+
+//send initialization status
+
 #endif
 
+  strcpy(tx_buf->message,"ZX INIT Done");
+    tx_buf->msg_type = INIT;
 
-
-//    uint32_t NotificationVal = 0x00;
-//    BaseType_t ret;
+    ret =  xQueueSendToFront( ZX_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
+    if(ret!= pdPASS)  UARTprintf("Que Full");
 
     for (;;)
     {
 
 #ifndef TEST
 
-        led_state = !led_state;
-        LED_PFO_ON_OFF(led_state);
 
         reg = ZX_STATUS;
         status = ZX_SENSOR_READ(reg);
 //       UARTprintf("Status:%x",status);
-
         if (status & (uint8_t) POSITION_DATA_AVAILABLE)
         {
             reg = ZPOS;
@@ -114,8 +120,10 @@ void ZXSensorTask(void* pvParameters)
 
 //       }
 #else
-        UARTprintf("\nZX");
-
+        strcpy(tx_buf->message,"ZX Sensor data");
+        tx_buf->msg_type = LOG;
+        ret =  xQueueSendToBack( ZX_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
+        if(ret!= pdPASS)  UARTprintf("Que Full");
 #endif
 
         vTaskDelay(pdMS_TO_TICKS(2000));

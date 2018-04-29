@@ -23,16 +23,19 @@
 #include "common.h"
 
 extern SemaphoreHandle_t RGB_sem ;
+extern QueueHandle_t RGB_Que;
 
 void RGBSensorTask(void* pvParameters)
 {
+    BaseType_t ret;
+    xSemaphoreTake(RGB_sem, portMAX_DELAY  );
 
-//initialize sensor
+    /***buffer for tx/rx data*****/
+    msg_struct *tx_buf = (msg_struct*)pvPortMalloc(PACKET_SIZE);
+    configASSERT(tx_buf != NULL);
+    tx_buf->dev_ID = DEV_ID;
 
-//wait for com layer to be ready
-
-//send to com layer on loop
-#ifndef TEST
+    #ifndef TEST
     uint8_t read_val;
     RGB_SENSOR_REG_t reg, reg1, reg2;
 
@@ -73,14 +76,13 @@ void RGBSensorTask(void* pvParameters)
     UARTprintf("\nThreshold HIGH:%x,%x", RGB_SENSOR_READ(reg1),
                RGB_SENSOR_READ(reg2));
 
-#else
-    xSemaphoreTake(RGB_sem, portMAX_DELAY  );
-    UARTprintf("\nRGB sem taken");
-
-    UARTprintf("\nRGB initialization done");
 #endif
 
+    strcpy(tx_buf->message,"RGB INIT Done");
+    tx_buf->msg_type = INIT;
 
+    ret =  xQueueSendToFront( RGB_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
+    if(ret!= pdPASS)  UARTprintf("Que Full");
 
     for (;;)
     {
@@ -104,7 +106,11 @@ void RGBSensorTask(void* pvParameters)
         UARTprintf("  BLUE:%x,%x", RGB_SENSOR_READ(reg1),
                    RGB_SENSOR_READ(reg2));
 #else
-        UARTprintf("\nRGB");
+        strcpy(tx_buf->message,"RGB Sensor data");
+        tx_buf->msg_type = LOG;
+        ret =  xQueueSendToBack( RGB_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
+        if(ret!= pdPASS)  UARTprintf("Que Full");
+
 #endif
 
 

@@ -5,12 +5,12 @@
  *      Author: Ravi
  */
 
-#include <COM.h>
-#include "FreeRTOS.h" //should be the first to be included from amongst all free rtos files
+#include "FreeRTOS.h"
 #include "task.h"
 #include "timers.h"
 #include "queue.h"
 #include "semphr.h"
+#include <projdefs.h>
 
 #include <FreeRTOS_IP.h>
 #include <FreeRTOS_Sockets.h>
@@ -18,51 +18,56 @@
 #include <string.h>
 #include <SensorTasks.h>
 
+#include <COM.h>
 #include "MyUart.h"
 #include "common.h"
 
 //Global Variables
 extern TaskHandle_t RGBHandle, ZXHandle;
 
+QueueHandle_t COM_que;
+
+
 void COMUARTClientTask(void* pvParameters)
 {
     UART6Enable();
     SysCtlDelay(10000);
+    BaseType_t ret;
+
+    COM_que = xQueueCreate(MAX_QUE_SIZE,PACKET_SIZE);
+    configASSERT(COM_que != NULL);
+
 
 //create two com  tasks
-//    UARTprintf("\nCreating ZX TASK\n");
-//    ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &ZXHandle);
-//    configASSERT(ret == pdPASS);
-//
-//    UARTprintf("\nCreating RGB TASK\n");
-//    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &RGBHandle);
-//     configASSERT(ret == pdPASS);
+    UARTprintf("\nCreating ZX TASK\n");
+    ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, NULL, 1, &ZXHandle);
+    configASSERT(ret == pdPASS);
+
+    UARTprintf("\nCreating RGB TASK\n");
+    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
+     configASSERT(ret == pdPASS);
 
 //wait for them to block
     vTaskDelay(pdMS_TO_TICKS(1000));
-
-//block on rcv data from them on que
-
-//send the data to BBG
-
     msg_struct *tx_buf = (msg_struct*) pvPortMalloc(PACKET_SIZE);
     configASSERT(tx_buf != NULL);
 
-    tx_buf->dev_ID = DEV_ID;
-//    tx_buf->task_ID = 2;//DEVICE_ID;
-    tx_buf->msg_type = COM_REQ;
-    strcpy(tx_buf->message, "Hello saranya abcdef");
-//
-//    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-
     while (1)
     {
+        //block on rcv data from them on que
+        ret = xQueueReceive(COM_que, tx_buf, portMAX_DELAY);//block on receive
+        configASSERT(ret == pdPASS);
+
+        //send the data to BBG
         UART6Send((uint8_t *) tx_buf, PACKET_SIZE);
-        UARTprintf("sent to uart\n");
-        vTaskDelay(pdMS_TO_TICKS(1000));
 
     }
 }
+
+
+
+
+
 
 void COMSocketClientTask(void* pvParameters)
 {
