@@ -14,7 +14,6 @@
 #include "timers.h"
 #include "queue.h"
 #include "semphr.h"
-#include "MyTasks.h"
 #include "MyUart.h"
 #include "common.h"
 
@@ -22,16 +21,23 @@
 #include <FreeRTOS_Sockets.h>
 #include <stdio.h>
 #include <string.h>
+#include <SensorTasks.h>
 
 
 TaskHandle_t ZXHandle;
 TaskHandle_t HBHandle;
 
+extern SemaphoreHandle_t ZX_sem ;
+
 void ZXTask(void* pvParameters)
 {
 
 
-    //signal sennsor to proceed
+    //signal sensor task to proceed
+    BaseType_t ret;
+    UARTprintf("\nZX sem given");
+    ret = xSemaphoreGive(ZX_sem );
+    configASSERT(ret == pdTRUE)
 
     //receive data on que
 

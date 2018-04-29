@@ -22,9 +22,17 @@
 
 TaskHandle_t RGBHandle;
 extern SemaphoreHandle_t xSemaphore ;
+extern SemaphoreHandle_t RGB_sem ;
 
 void RGBTask(void* pvParameters)
 {
+
+    //signal sensor task to proceed
+       BaseType_t ret;
+//       UARTprintf("\nRGB sem given");
+//       ret = xSemaphoreGive(RGB_sem );
+//       configASSERT(ret == pdTRUE)
+
 
     Socket_t *xClientSocket = (Socket_t*)pvParameters;
 

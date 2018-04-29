@@ -14,6 +14,7 @@
 
 //#define USE_UART
 
+#define TEST
 /************************************************************/
 #define MAX_TASKS 2
 #define DEV_ID 1

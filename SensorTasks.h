@@ -123,6 +123,8 @@ typedef enum{
 #define GPIO_PIN_ON           1
 #define GPIO_PIN_OFF          0
 
+void ZXSensorTask(void* pvParameters);
 
+void RGBSensorTask(void* pvParameters);
 
 #endif /* MYTASKS_H_ */

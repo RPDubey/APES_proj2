@@ -27,7 +27,6 @@
 #include "queue.h"
 #include "semphr.h"
 
-#include "MyTasks.h"
 #include "MyUart.h"
 #include "common.h"
 
@@ -35,6 +34,7 @@
 #include <FreeRTOS_Sockets.h>
 #include <stdio.h>
 #include <string.h>
+#include <SensorTasks.h>
 
 #define STACK_DEPTH           1024 //1024 words
 #define TICKS_PER_SECOND      1000
@@ -47,6 +47,7 @@
 extern TaskHandle_t  HBHandle;
 
 SemaphoreHandle_t xSemaphore,xServerSemaphore, xClientSemaphore;
+SemaphoreHandle_t ZX_sem, RGB_sem ;
 
 void PortLIntHandler(void)
 {
@@ -118,6 +119,13 @@ int main(void)
     xTimerStart(Timer2hz, 0);
     BaseType_t ret;
 
+    /************SEM*****/
+    ZX_sem = xSemaphoreCreateBinary();
+    configASSERT(ZX_sem != NULL)
+
+    RGB_sem = xSemaphoreCreateBinary();
+    configASSERT(RGB_sem != NULL)
+
 #ifdef USE_SOCKET
     static uint8_t ucMACAddress[6] = { 0x00, 0x1A, 0xB6, 0x03, 0x2E, 0x0F };
     static const uint8_t ucIPAddress[4] = { 192, 168, 0, 35 };
@@ -129,7 +137,7 @@ int main(void)
     ret = FreeRTOS_IPInit(ucIPAddress, ucNetMask,ucGatewayAddress,
                           ucDNSServerAddress, ucMACAddress);
     configASSERT(ret == pdPASS);
-    SysCtlDelay(1000);
+    SysCtlDelay(10000);
     UARTprintf("Initialized TCP/IP Stack\n");
 #endif
 
@@ -143,9 +151,13 @@ int main(void)
 
     ret = xTaskCreate(HBTask, "HB Task", STACK_DEPTH, NULL, 1, &HBHandle);
     configASSERT(ret == pdPASS);
-
-
-
+    SysCtlDelay(10000);
+    ret = xTaskCreate(ZXSensorTask, "ZX Sensor Task", STACK_DEPTH, NULL, 1, NULL);
+    configASSERT(ret == pdPASS);
+    SysCtlDelay(10000);
+//    ret = xTaskCreate(RGBSensorTask, "RGB Sensor Task", STACK_DEPTH, NULL, 1, NULL);
+//    configASSERT(ret == pdPASS);
+    SysCtlDelay(10000);
 
     vTaskStartScheduler();
 

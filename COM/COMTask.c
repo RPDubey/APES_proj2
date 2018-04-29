@@ -16,8 +16,8 @@
 #include <FreeRTOS_Sockets.h>
 #include <stdio.h>
 #include <string.h>
+#include <SensorTasks.h>
 
-#include "MyTasks.h"
 #include "MyUart.h"
 #include "common.h"
 
@@ -83,27 +83,32 @@ void COMSocketClientTask(void* pvParameters)
     do{
     task_num+=1;
     /* Attempt to open the socket. */
+    SysCtlDelay(10000);
     xClientSocket[task_num] = FreeRTOS_socket(FREERTOS_AF_INET,
                                     FREERTOS_SOCK_STREAM,
                                     FREERTOS_IPPROTO_TCP);
     /* Check the socket was created. */
     configASSERT(xClientSocket[task_num] != FREERTOS_INVALID_SOCKET);
+    SysCtlDelay(10000);
+
     /* Set receive timeout*/
     BaseType_t ret = FreeRTOS_setsockopt(xClientSocket[task_num], 0,
                                          FREERTOS_SO_RCVTIMEO,
                                          &xTimeOut, sizeof(xTimeOut));
     configASSERT(ret == 0);        //0 for success
+    SysCtlDelay(10000);
+
     /* Set Transmit timeout*/
     ret = FreeRTOS_setsockopt(xClientSocket[task_num], 0,
                               FREERTOS_SO_SNDTIMEO,
                               &xTimeOut, sizeof(xTimeOut));
     configASSERT(ret == 0);        //0 for success
-    SysCtlDelay(1000);
+    SysCtlDelay(10000);
     /* Bind the socket, but pass in NULL to let FreeRTOS+TCP choose the port num */
     ret = FreeRTOS_bind(xClientSocket[task_num], NULL, xSize);
     configASSERT(ret == 0);        //0 for success
     UARTprintf("\nClient Created\n");
-    SysCtlDelay(1000);
+    SysCtlDelay(10000);
     //set up the remote server address here
     struct freertos_sockaddr xRemoteAddress;
     port += task_num;
@@ -116,7 +121,7 @@ void COMSocketClientTask(void* pvParameters)
     #else
         xRemoteAddress.sin_addr = SERVER_IP_ADDRESS;//gets assigned by the dhcp on router
     #endif
-        SysCtlDelay(1000);
+        SysCtlDelay(10000);
     ret = FreeRTOS_connect(xClientSocket[task_num], &xRemoteAddress,sizeof(xRemoteAddress));
     if(ret!=0)
     {

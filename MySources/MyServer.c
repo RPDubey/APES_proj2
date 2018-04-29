@@ -16,7 +16,6 @@
 #include "timers.h"
 #include "queue.h"
 #include "semphr.h"
-#include "MyTasks.h"
 #include "MyUart.h"
 #include "common.h"
 
@@ -24,6 +23,7 @@
 #include <FreeRTOS_Sockets.h>
 #include <stdio.h>
 #include <string.h>
+#include <SensorTasks.h>
 
 
 void SocketServerTask(void* pvParameters)
