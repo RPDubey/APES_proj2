@@ -152,12 +152,12 @@ int main(void)
     ret = xTaskCreate(HBTask, "HB Task", STACK_DEPTH, NULL, 1, &HBHandle);
     configASSERT(ret == pdPASS);
     SysCtlDelay(10000);
-    ret = xTaskCreate(ZXSensorTask, "ZX Sensor Task", STACK_DEPTH, NULL, 1, NULL);
-    configASSERT(ret == pdPASS);
-    SysCtlDelay(10000);
+//    ret = xTaskCreate(ZXSensorTask, "ZX Sensor Task", STACK_DEPTH, NULL, 1, NULL);
+//    configASSERT(ret == pdPASS);
+//    SysCtlDelay(10000);
 //    ret = xTaskCreate(RGBSensorTask, "RGB Sensor Task", STACK_DEPTH, NULL, 1, NULL);
 //    configASSERT(ret == pdPASS);
-    SysCtlDelay(10000);
+ //   SysCtlDelay(30000);
 
     vTaskStartScheduler();
 

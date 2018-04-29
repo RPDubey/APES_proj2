@@ -8,7 +8,7 @@
 #ifndef MYINCLUDES_COM_H_
 #define MYINCLUDES_COM_H_
 
-#define PORT 100
+#define PORT 10240
 
 void SocketServerTask(void* pvParameters);
 

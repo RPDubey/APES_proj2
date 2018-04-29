@@ -71,11 +71,11 @@ void ZXSensorTask(void* pvParameters)
     read_val = ZX_SENSOR_READ(reg);
     UARTprintf("\nDRCFG:%x", read_val);
 #else
+    xSemaphoreTake(ZX_sem, portMAX_DELAY  );
+    UARTprintf("\nZX sem taken");
     UARTprintf("\nZX initialization done");
 #endif
 
-    xSemaphoreTake(ZX_sem, portMAX_DELAY  );
-    UARTprintf("\nZX sem taken");
 
 
 //    uint32_t NotificationVal = 0x00;

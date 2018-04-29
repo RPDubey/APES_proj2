@@ -28,7 +28,7 @@ void RGBTask(void* pvParameters)
 {
 
     //signal sensor task to proceed
-       BaseType_t ret;
+//       BaseType_t ret;
 //       UARTprintf("\nRGB sem given");
 //       ret = xSemaphoreGive(RGB_sem );
 //       configASSERT(ret == pdTRUE)

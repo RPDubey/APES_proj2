@@ -34,10 +34,10 @@ void ZXTask(void* pvParameters)
 
 
     //signal sensor task to proceed
-    BaseType_t ret;
-    UARTprintf("\nZX sem given");
-    ret = xSemaphoreGive(ZX_sem );
-    configASSERT(ret == pdTRUE)
+//    BaseType_t ret;
+//    UARTprintf("\nZX sem given");
+//    ret = xSemaphoreGive(ZX_sem );
+//    configASSERT(ret == pdTRUE)
 
     //receive data on que
 

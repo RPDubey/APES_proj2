@@ -74,11 +74,12 @@ void RGBSensorTask(void* pvParameters)
                RGB_SENSOR_READ(reg2));
 
 #else
+    xSemaphoreTake(RGB_sem, portMAX_DELAY  );
+    UARTprintf("\nRGB sem taken");
+
     UARTprintf("\nRGB initialization done");
 #endif
 
-    //xSemaphoreTake(RGB_sem, portMAX_DELAY  );
-    UARTprintf("\nRGB sem taken");
 
 
     for (;;)
