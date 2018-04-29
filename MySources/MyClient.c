@@ -26,29 +26,32 @@ void COMSocketClientTask(void* pvParameters)
 {
 
 //create client socket, configure using setsockopt, bind using bind
-    Socket_t xClientSocket;
+    Socket_t xClientSocket[MAX_TASKS];
     socklen_t xSize = sizeof(struct freertos_sockaddr);
     static const TickType_t xTimeOut = pdMS_TO_TICKS(20000);//20 seconds
+    int task_num = -1;
 
+do{
+    task_num++;
     /* Attempt to open the socket. */
-    xClientSocket = FreeRTOS_socket(FREERTOS_AF_INET,
+    xClientSocket[task_num] = FreeRTOS_socket(FREERTOS_AF_INET,
                                     FREERTOS_SOCK_STREAM,
                                     FREERTOS_IPPROTO_TCP);
     /* Check the socket was created. */
-    configASSERT(xClientSocket != FREERTOS_INVALID_SOCKET);
+    configASSERT(xClientSocket[task_num] != FREERTOS_INVALID_SOCKET);
     /* Set receive timeout*/
-    BaseType_t ret = FreeRTOS_setsockopt(xClientSocket, 0,
+    BaseType_t ret = FreeRTOS_setsockopt(xClientSocket[task_num], 0,
                                          FREERTOS_SO_RCVTIMEO,
                                          &xTimeOut, sizeof(xTimeOut));
     configASSERT(ret == 0);        //0 for success
     /* Set Transmit timeout*/
-    ret = FreeRTOS_setsockopt(xClientSocket, 0,
+    ret = FreeRTOS_setsockopt(xClientSocket[task_num], 0,
                               FREERTOS_SO_SNDTIMEO,
                               &xTimeOut, sizeof(xTimeOut));
     configASSERT(ret == 0);        //0 for success
 
     /* Bind the socket, but pass in NULL to let FreeRTOS+TCP choose the port num */
-    ret = FreeRTOS_bind(xClientSocket, NULL, xSize);
+    ret = FreeRTOS_bind(xClientSocket[task_num], NULL, xSize);
     configASSERT(ret == 0);        //0 for success
     UARTprintf("\nClient Created and bound to port\n");
     //set up the remote server address here
@@ -62,39 +65,27 @@ void COMSocketClientTask(void* pvParameters)
         xRemoteAddress.sin_addr = SERVER_IP_ADDRESS;//gets assigned by the dhcp on router
     #endif
 
-    ret = FreeRTOS_connect(xClientSocket, &xRemoteAddress,sizeof(xRemoteAddress));
+    ret = FreeRTOS_connect(xClientSocket[task_num], &xRemoteAddress,sizeof(xRemoteAddress));
     if(ret!=0)
     {
         UARTprintf("\nClient could not connect to server:%d\n",ret);
         while(1){SysCtlDelay(10000);}
     }
 
+if(task_num == 0){
+    ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &ZXHandle);
+    configASSERT(ret == pdPASS);
+}
 
-    ret = xTaskCreate(ZXTask, "RGB Task", STACK_DEPTH, (void*)(&xClientSocket), 1, &ZXHandle);
-     configASSERT(ret == pdPASS);
+if(task_num == 1){
+    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
+       configASSERT(ret == pdPASS);
 
+}
 
-//    /***buffer for tx/rx data*****/
-//    msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-//    configASSERT(tx_buf != NULL);
-//
-//    tx_buf->dev_ID = DEV_ID;
-////    tx_buf->task_ID = 2;//DEVICE_ID;
-//    tx_buf->msg_type = COM_REQ ;
-//    strcpy(tx_buf->message, "Hello saranya");
+}while(task_num < MAX_TASKS);
 
-//    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-//    configASSERT(rx_buf != NULL);
-//    BaseType_t xBytesSent;
-
-//    xBytesSent = FreeRTOS_send(xClientSocket, /* The socket being sent to. */
-//                               (void*) (tx_buf),/* The data being sent. */
-//                               PACKET_SIZE,/* The remaining length of data to send. */
-//                               0); /* ulFlags. */
-//    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
-
-
-    while (1){vTaskDelay(pdMS_TO_TICKS(60000));}//nothing else to do
+while (1){vTaskDelay(pdMS_TO_TICKS(60000));}//nothing else to do
 
 }
 

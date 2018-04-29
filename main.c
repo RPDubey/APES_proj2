@@ -130,11 +130,9 @@ int main(void)
 #endif
 
 
-
-#ifdef RGB
     ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
     configASSERT(ret == pdPASS);
-#endif
+
 
 
 

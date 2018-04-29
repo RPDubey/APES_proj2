@@ -13,7 +13,7 @@
 //#define USE_UART
 
 /************************************************************/
-#define MAX_TASKS 5
+#define MAX_TASKS 2
 #define DEV_ID 1
 #define RGB_TASK_ID 1
 #define ZX_TASK_ID  2
