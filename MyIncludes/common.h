@@ -8,8 +8,10 @@
 #ifndef MYINCLUDES_COMMON_H_
 #define MYINCLUDES_COMMON_H_
 
+#include<stdint.h>
 /*************** Compile time switches ***********************/
 #define USE_SOCKET
+
 //#define USE_UART
 
 /************************************************************/

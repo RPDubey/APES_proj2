@@ -5,6 +5,7 @@
  *      Author: Ravi
  */
 
+#include <COM.h>
 #include "FreeRTOS.h" //should be the first to be included from amongst all free rtos files
 #include "task.h"
 #include "timers.h"
@@ -16,7 +17,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "MySocket.h"
 #include "MyTasks.h"
 #include "MyUart.h"
 #include "common.h"
@@ -26,6 +26,46 @@
 
 //Global Variables
 extern TaskHandle_t RGBHandle, ZXHandle;
+
+void COMUARTClientTask(void* pvParameters){
+UART6Enable();
+SysCtlDelay(10000);
+
+//create two com  tasks
+//    UARTprintf("\nCreating ZX TASK\n");
+//    ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &ZXHandle);
+//    configASSERT(ret == pdPASS);
+//
+//    UARTprintf("\nCreating RGB TASK\n");
+//    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &RGBHandle);
+//     configASSERT(ret == pdPASS);
+
+//wait for them to block
+vTaskDelay(pdMS_TO_TICKS(1000));
+
+//block on rcv data from them on que
+
+//send the data to BBG
+
+msg_struct *tx_buf = (msg_struct*) pvPortMalloc(PACKET_SIZE);
+configASSERT(tx_buf != NULL);
+
+tx_buf->dev_ID = DEV_ID;
+//    tx_buf->task_ID = 2;//DEVICE_ID;
+tx_buf->msg_type = COM_REQ;
+strcpy(tx_buf->message, "Hello saranya abcdef");
+//
+//    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+
+
+while(1){
+UART6Send( (uint8_t *)tx_buf, PACKET_SIZE);
+UARTprintf("sent to uart\n");
+vTaskDelay(pdMS_TO_TICKS(1000));
+
+
+}
+}
 
 
 void COMSocketClientTask(void* pvParameters)
@@ -76,12 +116,12 @@ void COMSocketClientTask(void* pvParameters)
     #else
         xRemoteAddress.sin_addr = SERVER_IP_ADDRESS;//gets assigned by the dhcp on router
     #endif
-
+        SysCtlDelay(1000);
     ret = FreeRTOS_connect(xClientSocket[task_num], &xRemoteAddress,sizeof(xRemoteAddress));
     if(ret!=0)
     {
         UARTprintf("\nClient could not connect to server:%d\n",ret);
-        while(1){SysCtlDelay(10000);}
+        while(1){SysCtlDelay(100000);}
     }
     SysCtlDelay(10000);
     UARTprintf("\nClient Connected\n");
@@ -93,7 +133,7 @@ if(k == 1){
 }
 
 else if(k == 0){
-    UARTprintf("\nCreating HB TASK\n");
+    UARTprintf("\nCreating RGB TASK\n");
     ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &RGBHandle);
        configASSERT(ret == pdPASS);
        k=1;

@@ -10,7 +10,7 @@
 
 
 void UART0Enable();
-
-void UARTSend(const uint8_t *pui8Buffer, uint32_t ui32Count);
+void UART6Enable();
+void UART6Send(const uint8_t *pui8Buffer, uint32_t ui32Count);
 
 #endif /* MYUART_H_ */

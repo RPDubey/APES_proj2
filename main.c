@@ -6,8 +6,10 @@
 //
 //*****************************************************************************
 
+#include <COM.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
@@ -24,6 +26,7 @@
 #include "timers.h"
 #include "queue.h"
 #include "semphr.h"
+
 #include "MyTasks.h"
 #include "MyUart.h"
 #include "common.h"
@@ -32,7 +35,6 @@
 #include <FreeRTOS_Sockets.h>
 #include <stdio.h>
 #include <string.h>
-#include "MySocket.h"
 
 #define STACK_DEPTH           1024 //1024 words
 #define TICKS_PER_SECOND      1000
@@ -129,6 +131,13 @@ int main(void)
     configASSERT(ret == pdPASS);
     SysCtlDelay(1000);
     UARTprintf("Initialized TCP/IP Stack\n");
+#endif
+
+#ifdef USE_UART
+    ret = xTaskCreate(COMUARTClientTask, "UART Client Task",
+                      STACK_DEPTH, NULL, 1,NULL);
+    configASSERT(ret == pdPASS);
+
 #endif
 
 

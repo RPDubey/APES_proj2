@@ -5,6 +5,7 @@
  *      Author: Ravi
  */
 
+#include <COM.h>
 #include<stdint.h>
 #include<stdlib.h>
 
@@ -13,8 +14,6 @@
 #include "timers.h"
 #include <FreeRTOS_IP.h>
 #include <FreeRTOS_Sockets.h>
-#include "MySocket.h"
-
 #include "common.h"
 
 /* Defined by the application code, but called by FreeRTOS when the network
@@ -56,7 +55,7 @@ void vApplicationIPNetworkEventHook(eIPCallbackEvent_t eNetworkEvent)
        if( xTasksAlreadyCreated == pdFALSE )
        {
 
-           xTasksAlreadyCreated = xTaskCreate(COMSocketClientTask, "Client Task", STACK_DEPTH, NULL, 1,
+           xTasksAlreadyCreated = xTaskCreate(COMSocketClientTask, "Socket Client Task", STACK_DEPTH, NULL, 1,
              NULL);
            configASSERT(xTasksAlreadyCreated == pdPASS);
 

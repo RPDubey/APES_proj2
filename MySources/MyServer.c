@@ -10,6 +10,7 @@
 
 
 
+#include <COM.h>
 #include "FreeRTOS.h" //should be the first to be included from amongst all free rtos files
 #include "task.h"
 #include "timers.h"
@@ -24,7 +25,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "MySocket.h"
 
 void SocketServerTask(void* pvParameters)
 {
