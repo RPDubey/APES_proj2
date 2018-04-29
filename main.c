@@ -136,10 +136,6 @@ int main(void)
     configASSERT(ret == pdPASS);
 #endif
 
-//#ifdef ZX
-//    ret = xTaskCreate(ZXTask, "RGB Task", STACK_DEPTH, NULL, 2, &RGBHandle);
-//    configASSERT(ret == pdPASS);
-//#endif
 
 
     vTaskStartScheduler();

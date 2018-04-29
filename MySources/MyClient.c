@@ -69,6 +69,9 @@ void COMSocketClientTask(void* pvParameters)
         while(1){SysCtlDelay(10000);}
     }
 
+
+
+
     /***buffer for tx/rx data*****/
     msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
     configASSERT(tx_buf != NULL);
@@ -82,40 +85,16 @@ void COMSocketClientTask(void* pvParameters)
     configASSERT(rx_buf != NULL);
     BaseType_t xBytesSent;
 
-    while(1){
     xBytesSent = FreeRTOS_send(xClientSocket, /* The socket being sent to. */
                                (void*) (tx_buf),/* The data being sent. */
                                PACKET_SIZE,/* The remaining length of data to send. */
                                0); /* ulFlags. */
-    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);break;}
+    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
 
-    UARTprintf("\nCOM send failed:%d ", xBytesSent);
-    UARTprintf("\nCOM Try Again ");
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-    /*If response is ACK, Create anew task*/
-    while(1){
-        xBytesSent = FreeRTOS_recv(xClientSocket,(void*)(rx_buf),PACKET_SIZE,0);
-        if (xBytesSent >= 0) break;
-        UARTprintf("\nCOM rcv failed:%d ", xBytesSent);
-        UARTprintf("\nCOM Try Again ");
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        }
+    ret = xTaskCreate(ZXTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
+    configASSERT(ret == pdPASS);
 
-    UARTprintf("\nBytes Rxd:%d", xBytesSent);
-    UARTprintf("\nclient:dev_ID:%d",((msg_struct*)rx_buf)->dev_ID);
-    UARTprintf("\nclient:msg_type:%d",((msg_struct*)rx_buf)->msg_type);
-
-//    if(dev_ID ==  && msg_type == ){
-//        UARTprintf("\nHandshake accepted by server");
-//    }
-//    else
-//    {
-//        UARTprintf("\nHandshake refused by server");
-//    }
     while (1){vTaskDelay(pdMS_TO_TICKS(10000));}//nothing else to do
-
-
 
 }
 
