@@ -49,11 +49,12 @@ do{
                               FREERTOS_SO_SNDTIMEO,
                               &xTimeOut, sizeof(xTimeOut));
     configASSERT(ret == 0);        //0 for success
-
+    SysCtlDelay(1000);
     /* Bind the socket, but pass in NULL to let FreeRTOS+TCP choose the port num */
     ret = FreeRTOS_bind(xClientSocket[task_num], NULL, xSize);
     configASSERT(ret == 0);        //0 for success
-    UARTprintf("\nClient Created and bound to port\n");
+    UARTprintf("\nClient Created\n");
+    SysCtlDelay(1000);
     //set up the remote server address here
     struct freertos_sockaddr xRemoteAddress;
     /* Set the IP address & port of server to which client will transmit. */
@@ -71,7 +72,7 @@ do{
         UARTprintf("\nClient could not connect to server:%d\n",ret);
         while(1){SysCtlDelay(10000);}
     }
-
+    SysCtlDelay(10000);
 if(task_num == 0){
     ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &ZXHandle);
     configASSERT(ret == pdPASS);
