@@ -41,6 +41,7 @@
 #define ZX
 
 
+extern TaskHandle_t RGBHandle;
 
 SemaphoreHandle_t xSemaphore,xServerSemaphore, xClientSemaphore;
 

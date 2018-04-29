@@ -52,6 +52,43 @@ typedef enum{
 #define HOVER_GESTURE_AVAILABLE 0x08
 #define HVRMV_GESTURE_AVAILABLE 0x10
 
+TaskHandle_t  ZXHandle;
+
+void HBTask(void* pvParameters)
+{
+    Socket_t *xClientSocket = (Socket_t*)pvParameters;
+
+    /***buffer for tx/rx data*****/
+    msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+    configASSERT(tx_buf != NULL);
+
+    tx_buf->dev_ID = DEV_ID;
+//    tx_buf->task_ID = 2;//DEVICE_ID;
+    tx_buf->msg_type = 3 ;
+    strcpy(tx_buf->message, "Hello 1234567");
+//
+//    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+//    configASSERT(rx_buf != NULL);
+//    BaseType_t xBytesSent;
+//
+  //  vTaskDelay(pdMS_TO_TICKS(500));
+   BaseType_t xBytesSent = FreeRTOS_send(*xClientSocket, /* The socket being sent to. */
+                               (void*) (tx_buf),/* The data being sent. */
+                               PACKET_SIZE,/* The remaining length of data to send. */
+                               0); /* ulFlags. */
+    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
+    else UARTprintf("send failed\n");
+
+    while(1){
+        UARTprintf("aloha\n");
+
+        vTaskDelay(pdMS_TO_TICKS(10000));
+    }
+
+    vTaskDelete(NULL);
+}
+
+
 void ZXTask(void* pvParameters)
 {
     Socket_t *xClientSocket = (Socket_t*)pvParameters;
@@ -69,6 +106,7 @@ void ZXTask(void* pvParameters)
 //    configASSERT(rx_buf != NULL);
 //    BaseType_t xBytesSent;
 //
+    SysCtlDelay(1000);
    BaseType_t xBytesSent = FreeRTOS_send(*xClientSocket, /* The socket being sent to. */
                                (void*) (tx_buf),/* The data being sent. */
                                PACKET_SIZE,/* The remaining length of data to send. */
@@ -76,9 +114,10 @@ void ZXTask(void* pvParameters)
     if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
 
     while(1){
+
+        vTaskDelay(pdMS_TO_TICKS(10000));
         UARTprintf("Hello\n");
 
-        vTaskDelay(pdMS_TO_TICKS(3000));
     }
 //    LED_PF0_SETUP
 //    uint32_t led_state = GPIO_PIN_OFF;

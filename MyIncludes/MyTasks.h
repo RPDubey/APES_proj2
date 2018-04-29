@@ -18,7 +18,7 @@
 #include "task.h"
 #include "timers.h"
 #include "semphr.h"
-#include "MyI2C.h"
+
 
 /*****Includes for RGB**********/
 #define RGB_SENSOR_ADDRESS 0x44
@@ -124,14 +124,11 @@ typedef enum{
 #define GPIO_PIN_OFF          0
 
 
-SemaphoreHandle_t xSemaphore ;
-
-
-//Global Variables
-TaskHandle_t RGBHandle, ZXHandle;
-
 void RGBTask(void* pvParameters);
 
 void ZXTask(void* pvParameters);
+
+void HBTask(void* pvParameters);
+
 
 #endif /* MYTASKS_H_ */

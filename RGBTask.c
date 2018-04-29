@@ -9,6 +9,7 @@
 #include "utils/uartstdio.h"
 #include "driverlib/i2c.h"
 
+TaskHandle_t RGBHandle;
 
 void RGBTask(void* pvParameters)
 {

@@ -10,9 +10,6 @@
 #include "timers.h"
 #include "queue.h"
 #include "semphr.h"
-#include "MyTasks.h"
-#include "MyUart.h"
-#include "common.h"
 
 #include <FreeRTOS_IP.h>
 #include <FreeRTOS_Sockets.h>
@@ -20,6 +17,16 @@
 #include <string.h>
 
 #include "MySocket.h"
+#include "MyTasks.h"
+#include "MyUart.h"
+#include "common.h"
+
+
+extern SemaphoreHandle_t xSemaphore ;
+
+//Global Variables
+extern TaskHandle_t RGBHandle, ZXHandle;
+TaskHandle_t  HBHandle;
 
 
 void COMSocketClientTask(void* pvParameters)
@@ -30,9 +37,12 @@ void COMSocketClientTask(void* pvParameters)
     socklen_t xSize = sizeof(struct freertos_sockaddr);
     static const TickType_t xTimeOut = pdMS_TO_TICKS(20000);//20 seconds
     int task_num = -1;
+    int k =0;
+    uint16_t port = PORT;
 
-do{
-    task_num++;
+
+    do{
+    task_num+=1;
     /* Attempt to open the socket. */
     xClientSocket[task_num] = FreeRTOS_socket(FREERTOS_AF_INET,
                                     FREERTOS_SOCK_STREAM,
@@ -57,8 +67,10 @@ do{
     SysCtlDelay(1000);
     //set up the remote server address here
     struct freertos_sockaddr xRemoteAddress;
+    port += task_num;
     /* Set the IP address & port of server to which client will transmit. */
-    xRemoteAddress.sin_port = FreeRTOS_htons(PORT);
+    UARTprintf("port:%d ",port);
+    xRemoteAddress.sin_port = FreeRTOS_htons(port);
 
     #if (ipconfigUSE_DHCP == 0 )
         xRemoteAddress.sin_addr = DEFAULT_SERVER_IP_ADDRESS;//static address
@@ -73,18 +85,25 @@ do{
         while(1){SysCtlDelay(10000);}
     }
     SysCtlDelay(10000);
-if(task_num == 0){
+    UARTprintf("\nClient Connected\n");
+
+if(k == 1){
+    UARTprintf("\nCreating ZX TASK\n");
     ret = xTaskCreate(ZXTask, "ZX Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &ZXHandle);
     configASSERT(ret == pdPASS);
 }
 
-if(task_num == 1){
-    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
+else if(k == 0){
+    UARTprintf("\nCreating HB TASK\n");
+    ret = xTaskCreate(HBTask, "HB Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &HBHandle);
        configASSERT(ret == pdPASS);
+       k=1;
 
 }
 
-}while(task_num < MAX_TASKS);
+vTaskDelay(pdMS_TO_TICKS(3000));
+
+}while(task_num < MAX_TASKS - 1);
 
 while (1){vTaskDelay(pdMS_TO_TICKS(60000));}//nothing else to do
 
