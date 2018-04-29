@@ -22,11 +22,10 @@
 #include "common.h"
 
 
-extern SemaphoreHandle_t xSemaphore ;
+
 
 //Global Variables
 extern TaskHandle_t RGBHandle, ZXHandle;
-TaskHandle_t  HBHandle;
 
 
 void COMSocketClientTask(void* pvParameters)
@@ -95,7 +94,7 @@ if(k == 1){
 
 else if(k == 0){
     UARTprintf("\nCreating HB TASK\n");
-    ret = xTaskCreate(HBTask, "HB Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &HBHandle);
+    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, (void*)(&xClientSocket[task_num]), 1, &RGBHandle);
        configASSERT(ret == pdPASS);
        k=1;
 
@@ -105,24 +104,8 @@ vTaskDelay(pdMS_TO_TICKS(3000));
 
 }while(task_num < MAX_TASKS - 1);
 
+
 while (1){vTaskDelay(pdMS_TO_TICKS(60000));}//nothing else to do
 
 }
 
-/****called from the hook function once IP is assigned****/
-void SocketTask(void* pvParameters)
-{
-      BaseType_t ret;
-    ret = xTaskCreate(SocketServerTask, "Server Task", STACK_DEPTH, NULL, 2,
-    NULL);
-    configASSERT(ret == pdPASS);
-
-    ret = xTaskCreate(COMSocketClientTask, "Client Task", STACK_DEPTH, NULL, 1,
-    NULL);
-    configASSERT(ret == pdPASS);
-
-    while (1)
-    {
-        vTaskDelay(pdMS_TO_TICKS(2000));
-    }
-}

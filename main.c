@@ -41,7 +41,8 @@
 #define ZX
 
 
-extern TaskHandle_t RGBHandle;
+//extern TaskHandle_t RGBHandle;
+extern TaskHandle_t  HBHandle;
 
 SemaphoreHandle_t xSemaphore,xServerSemaphore, xClientSemaphore;
 
@@ -81,7 +82,7 @@ static void vTimer2hzCallbackFunction(TimerHandle_t xTimer)
 {
 
 #ifdef RGB
-    vTaskResume(RGBHandle);
+    vTaskResume(HBHandle);
 #endif
 
 }
@@ -131,7 +132,7 @@ int main(void)
 #endif
 
 
-    ret = xTaskCreate(RGBTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
+    ret = xTaskCreate(HBTask, "HB Task", STACK_DEPTH, NULL, 1, &HBHandle);
     configASSERT(ret == pdPASS);
 
 

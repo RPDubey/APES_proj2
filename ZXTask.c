@@ -5,7 +5,6 @@
  *      Author: Ravi
  */
 
-
 #include "MyTasks.h"
 #include "utils/uartstdio.h"
 #include "common.h"
@@ -24,82 +23,46 @@
 #include <stdio.h>
 #include <string.h>
 
-
-
 #define ZX_SENSOR_ADDR           0x10
 
 #define ZX_SENSOR_WRITE(DataTx,reg) I2C0_Master_Write(ZX_SENSOR_ADDR,DataTx,reg)
 #define ZX_SENSOR_READ(reg)     I2C0_Master_Read(ZX_SENSOR_ADDR,reg)
 
-
-typedef enum{
-    ZX_STATUS =    0x00,
-    DRE    =    0x01,
-    DRCFG  =    0x02,
-    GESTURE=    0x04,
-    GSPEED =    0x05,
-    DCM    =    0x06,
-    XPOS   =    0x08,
-    ZPOS   =    0x0a,
-    LRNG   =    0x0c,
-    RRNG   =    0x0e,
-    REGVER =    0xfe,
-    MODEL  =    0xff
-}ZX_SENSOR_REG_t;
+typedef enum
+{
+    ZX_STATUS = 0x00,
+    DRE = 0x01,
+    DRCFG = 0x02,
+    GESTURE = 0x04,
+    GSPEED = 0x05,
+    DCM = 0x06,
+    XPOS = 0x08,
+    ZPOS = 0x0a,
+    LRNG = 0x0c,
+    RRNG = 0x0e,
+    REGVER = 0xfe,
+    MODEL = 0xff
+} ZX_SENSOR_REG_t;
 
 #define POSITION_DATA_AVAILABLE 0x01
 #define SWIPE_GESTURE_AVAILABLE 0x04
 #define HOVER_GESTURE_AVAILABLE 0x08
 #define HVRMV_GESTURE_AVAILABLE 0x10
 
-TaskHandle_t  ZXHandle;
-
-void HBTask(void* pvParameters)
-{
-    Socket_t *xClientSocket = (Socket_t*)pvParameters;
-
-    /***buffer for tx/rx data*****/
-    msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-    configASSERT(tx_buf != NULL);
-
-    tx_buf->dev_ID = DEV_ID;
-//    tx_buf->task_ID = 2;//DEVICE_ID;
-    tx_buf->msg_type = 3 ;
-    strcpy(tx_buf->message, "Hello 1234567");
-//
-//    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-//    configASSERT(rx_buf != NULL);
-//    BaseType_t xBytesSent;
-//
-  //  vTaskDelay(pdMS_TO_TICKS(500));
-   BaseType_t xBytesSent = FreeRTOS_send(*xClientSocket, /* The socket being sent to. */
-                               (void*) (tx_buf),/* The data being sent. */
-                               PACKET_SIZE,/* The remaining length of data to send. */
-                               0); /* ulFlags. */
-    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
-    else UARTprintf("send failed\n");
-
-    while(1){
-        UARTprintf("aloha\n");
-
-        vTaskDelay(pdMS_TO_TICKS(10000));
-    }
-
-    vTaskDelete(NULL);
-}
-
+TaskHandle_t ZXHandle;
+TaskHandle_t HBHandle;
 
 void ZXTask(void* pvParameters)
 {
-    Socket_t *xClientSocket = (Socket_t*)pvParameters;
+    Socket_t *xClientSocket = (Socket_t*) pvParameters;
 
     /***buffer for tx/rx data*****/
-    msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+    msg_struct *tx_buf = (msg_struct*) pvPortMalloc(PACKET_SIZE);
     configASSERT(tx_buf != NULL);
 
     tx_buf->dev_ID = DEV_ID;
 //    tx_buf->task_ID = 2;//DEVICE_ID;
-    tx_buf->msg_type = COM_REQ ;
+    tx_buf->msg_type = COM_REQ;
     strcpy(tx_buf->message, "Hello saranya");
 //
 //    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
@@ -107,13 +70,17 @@ void ZXTask(void* pvParameters)
 //    BaseType_t xBytesSent;
 //
     SysCtlDelay(1000);
-   BaseType_t xBytesSent = FreeRTOS_send(*xClientSocket, /* The socket being sent to. */
-                               (void*) (tx_buf),/* The data being sent. */
-                               PACKET_SIZE,/* The remaining length of data to send. */
-                               0); /* ulFlags. */
-    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
+    BaseType_t xBytesSent = FreeRTOS_send(*xClientSocket, /* The socket being sent to. */
+                                          (void*) (tx_buf),/* The data being sent. */
+                                          PACKET_SIZE,/* The remaining length of data to send. */
+                                          0); /* ulFlags. */
+    if (xBytesSent >= 0)
+    {
+        UARTprintf("\nBytes Sent:%d", xBytesSent);
+    }
 
-    while(1){
+    while (1)
+    {
 
         vTaskDelay(pdMS_TO_TICKS(10000));
         UARTprintf("Hello\n");
@@ -189,3 +156,24 @@ void ZXTask(void* pvParameters)
 
     vTaskDelete(NULL);
 }
+
+
+
+void HBTask(void* pvParameters)
+{
+    LED_PF0_SETUP
+    uint32_t led_state = GPIO_PIN_OFF;
+
+    while (1)
+    {
+
+        vTaskSuspend(HBHandle);
+        led_state = !led_state;
+        LED_PFO_ON_OFF(led_state);
+
+    }
+
+    vTaskDelete(NULL);
+
+}
+

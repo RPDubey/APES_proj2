@@ -4,24 +4,58 @@
  *  Created on: Apr 13, 2018
  *      Author: Ravi
  */
+#include "FreeRTOS.h" //should be the first to be included from amongst all free rtos files
+#include "task.h"
+#include "timers.h"
+#include "queue.h"
+#include "semphr.h"
+
+#include <FreeRTOS_IP.h>
+#include <FreeRTOS_Sockets.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "MyTasks.h"
 #include "utils/uartstdio.h"
 #include "driverlib/i2c.h"
+#include "common.h"
 
 TaskHandle_t RGBHandle;
+extern SemaphoreHandle_t xSemaphore ;
 
 void RGBTask(void* pvParameters)
 {
 
-    LED_PF0_SETUP
-    uint32_t led_state = GPIO_PIN_OFF;
+    Socket_t *xClientSocket = (Socket_t*)pvParameters;
+
+      /***buffer for tx/rx data*****/
+      msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+      configASSERT(tx_buf != NULL);
+
+      tx_buf->dev_ID = DEV_ID;
+    //    tx_buf->task_ID = 2;//DEVICE_ID;
+      tx_buf->msg_type = 3 ;
+      strcpy(tx_buf->message, "Hello 1234567");
+    //
+    //    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+    //    configASSERT(rx_buf != NULL);
+    //    BaseType_t xBytesSent;
+    //
+    //  vTaskDelay(pdMS_TO_TICKS(500));
+     BaseType_t xBytesSent = FreeRTOS_send(*xClientSocket, /* The socket being sent to. */
+                                 (void*) (tx_buf),/* The data being sent. */
+                                 PACKET_SIZE,/* The remaining length of data to send. */
+                                 0); /* ulFlags. */
+      if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
+      else UARTprintf("send failed\n");
+
+
 
 //    uint8_t read_val;
 //    RGB_SENSOR_REG_t reg, reg1, reg2;
 
 
-#ifndef socket
+
 
 //    //reset
 //    reg = DEVICE_ID;
@@ -54,13 +88,13 @@ void RGBTask(void* pvParameters)
 //    RGB_SENSOR_WRITE(0x00,reg1);RGB_SENSOR_WRITE(0xFF,reg2);
 //    UARTprintf("\nThreshold HIGH:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
 
-#endif
+
 
     for (;;)
     {
-        vTaskSuspend(RGBHandle);
-        led_state = !led_state;
-        LED_PFO_ON_OFF(led_state);
+
+        UARTprintf("aloha\n");
+
  /*
         UARTprintf("\n");
 
@@ -78,7 +112,7 @@ void RGBTask(void* pvParameters)
        reg1 = BLUE_H; reg2 = BLUE_L;
        UARTprintf("  BLUE:%x,%x",RGB_SENSOR_READ(reg1),RGB_SENSOR_READ(reg2) );
 */
-
+vTaskDelay(pdMS_TO_TICKS(2000));
     }
 
     vTaskDelete(NULL);
