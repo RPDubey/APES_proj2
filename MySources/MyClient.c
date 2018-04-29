@@ -70,31 +70,31 @@ void COMSocketClientTask(void* pvParameters)
     }
 
 
+    ret = xTaskCreate(ZXTask, "RGB Task", STACK_DEPTH, (void*)(&xClientSocket), 1, &ZXHandle);
+     configASSERT(ret == pdPASS);
 
 
-    /***buffer for tx/rx data*****/
-    msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-    configASSERT(tx_buf != NULL);
+//    /***buffer for tx/rx data*****/
+//    msg_struct *tx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+//    configASSERT(tx_buf != NULL);
+//
+//    tx_buf->dev_ID = DEV_ID;
+////    tx_buf->task_ID = 2;//DEVICE_ID;
+//    tx_buf->msg_type = COM_REQ ;
+//    strcpy(tx_buf->message, "Hello saranya");
 
-    tx_buf->dev_ID = DEV_ID;
-//    tx_buf->task_ID = 2;//DEVICE_ID;
-    tx_buf->msg_type = COM_REQ ;
-    strcpy(tx_buf->message, "Hello saranya");
+//    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
+//    configASSERT(rx_buf != NULL);
+//    BaseType_t xBytesSent;
 
-    msg_struct *rx_buf= (msg_struct*)pvPortMalloc(PACKET_SIZE);
-    configASSERT(rx_buf != NULL);
-    BaseType_t xBytesSent;
+//    xBytesSent = FreeRTOS_send(xClientSocket, /* The socket being sent to. */
+//                               (void*) (tx_buf),/* The data being sent. */
+//                               PACKET_SIZE,/* The remaining length of data to send. */
+//                               0); /* ulFlags. */
+//    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
 
-    xBytesSent = FreeRTOS_send(xClientSocket, /* The socket being sent to. */
-                               (void*) (tx_buf),/* The data being sent. */
-                               PACKET_SIZE,/* The remaining length of data to send. */
-                               0); /* ulFlags. */
-    if (xBytesSent >= 0)  {UARTprintf("\nBytes Sent:%d", xBytesSent);}
 
-    ret = xTaskCreate(ZXTask, "RGB Task", STACK_DEPTH, NULL, 1, &RGBHandle);
-    configASSERT(ret == pdPASS);
-
-    while (1){vTaskDelay(pdMS_TO_TICKS(10000));}//nothing else to do
+    while (1){vTaskDelay(pdMS_TO_TICKS(60000));}//nothing else to do
 
 }
 
