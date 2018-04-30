@@ -61,7 +61,7 @@ typedef enum
 extern SemaphoreHandle_t ZX_sem;
 extern QueueHandle_t ZX_Que;
 TaskHandle_t ZXSensorHandle;
-
+extern uint8_t HB_flag;
 void ZXSensorTask(void* pvParameters)
 {
     BaseType_t ret;
@@ -109,7 +109,7 @@ void ZXSensorTask(void* pvParameters)
 
     for (;;)
     {
-
+if(HB_flag==0){
 #ifndef TEST
 
         reg = ZX_STATUS;
@@ -125,8 +125,17 @@ void ZXSensorTask(void* pvParameters)
         tx_buf->msg_type = LOG;
         tx_buf->msg_val = read_val;
 
+        HB_flag = 1;
 #endif
+}
+else
+{
+    strcpy(tx_buf->message, "HB");
+           tx_buf->msg_type = HB;
+           tx_buf->msg_val = 1;
 
+
+}
         ret = xQueueSendToBack(ZX_Que, (void * )tx_buf, pdMS_TO_TICKS(3000));
         if (ret != pdPASS)
             UARTprintf("Que Full");

@@ -50,13 +50,14 @@ BaseType_t xHighPriorityWoken = pdFALSE;
 SemaphoreHandle_t xSemaphore,xServerSemaphore, xClientSemaphore;
 SemaphoreHandle_t ZX_sem, RGB_sem ;
 
+uint8_t HB_flag;
 void PortLIntHandler(void)
 {
+    HB_flag = 0;
     uint32_t read = 0x00;
     read = GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_3);
     vTaskNotifyGiveFromISR(ZXSensorHandle, &xHighPriorityWoken);
     GPIOIntClear(GPIO_PORTL_BASE, GPIO_INT_PIN_3);
-
 }
 
 GPIOInterruptEnable()
@@ -76,13 +77,13 @@ static void vTimer2hzCallbackFunction(TimerHandle_t xTimer)
 {
 
 vTaskResume(HBHandle);
-
+vTaskNotifyGiveFromISR(ZXSensorHandle, &xHighPriorityWoken);
 }
 
 
 int main(void)
 {
-
+HB_flag = 1;
     //set clock frequency to 120 MHZ
     g_ui32SysClock = MAP_SysCtlClockFreqSet(
             (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL
