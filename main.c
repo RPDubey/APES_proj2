@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #include "inc/hw_memmap.h"
+#include "inc/hw_ints.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/uart.h"
@@ -43,8 +44,8 @@
 #define ZX
 
 
-//extern TaskHandle_t RGBHandle;
-extern TaskHandle_t  HBHandle;
+extern TaskHandle_t  HBHandle, ZXSensorHandle;
+BaseType_t xHighPriorityWoken = pdFALSE;
 
 SemaphoreHandle_t xSemaphore,xServerSemaphore, xClientSemaphore;
 SemaphoreHandle_t ZX_sem, RGB_sem ;
@@ -52,19 +53,8 @@ SemaphoreHandle_t ZX_sem, RGB_sem ;
 void PortLIntHandler(void)
 {
     uint32_t read = 0x00;
-    //static uint32_t flag = 0;
     read = GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_3);
-
-    if (!read)
-    {
-        UARTprintf("\nRED:%x,%x", RGB_SENSOR_READ(RED_H),
-                   RGB_SENSOR_READ(RED_L));
-    }
-
-#ifdef ZX
-    xSemaphoreGiveFromISR(xSemaphore, pdFAIL);
-#endif
-
+    vTaskNotifyGiveFromISR(ZXSensorHandle, &xHighPriorityWoken);
     GPIOIntClear(GPIO_PORTL_BASE, GPIO_INT_PIN_3);
 
 }
@@ -78,15 +68,14 @@ GPIOInterruptEnable()
     GPIOPinTypeGPIOInput(GPIO_PORTL_BASE, GPIO_PIN_3);
     GPIOIntTypeSet(GPIO_PORTL_BASE, GPIO_PIN_3, GPIO_FALLING_EDGE);
     GPIOIntEnable(GPIO_PORTL_BASE, GPIO_PIN_3);
+    IntPrioritySet(INT_GPIOL_TM4C129, 0xE0);
 }
 
 uint32_t g_ui32SysClock;
 static void vTimer2hzCallbackFunction(TimerHandle_t xTimer)
 {
 
-#ifdef RGB
-    vTaskResume(HBHandle);
-#endif
+vTaskResume(HBHandle);
 
 }
 
@@ -101,7 +90,7 @@ int main(void)
             SYSTEM_CLOCK);
 
     static const uint32_t ulFrequency2hz = 2;
-    TickType_t Ticks2hz = pdMS_TO_TICKS(TICKS_PER_SECOND/ulFrequency2hz);
+    TickType_t Ticks2hz = pdMS_TO_TICKS(2000);
 
     UART0Enable();
     UARTStdioConfig(0, 115200, g_ui32SysClock);
@@ -152,7 +141,7 @@ int main(void)
     ret = xTaskCreate(HBTask, "HB Task", STACK_DEPTH, NULL, 1, &HBHandle);
     configASSERT(ret == pdPASS);
     SysCtlDelay(1000);
-    ret = xTaskCreate(ZXSensorTask, "ZX Sensor Task", STACK_DEPTH, NULL, 1, NULL);
+    ret = xTaskCreate(ZXSensorTask, "ZX Sensor Task", STACK_DEPTH, NULL,  1, &ZXSensorHandle);//configMAX_PRIORITIES -
     configASSERT(ret == pdPASS);
     SysCtlDelay(10000);
     ret = xTaskCreate(RGBSensorTask, "RGB Sensor Task", STACK_DEPTH, NULL, 1, NULL);

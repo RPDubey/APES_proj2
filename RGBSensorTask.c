@@ -22,8 +22,28 @@
 #include "driverlib/i2c.h"
 #include "common.h"
 
+
+const uint8_t   DEVICE_ID = 0x00;
+const uint8_t    CONFIG_1 =  0x01;
+const uint8_t   CONFIG_2 = 0x02;
+const uint8_t   CONFIG_3 = 0x03;
+const uint8_t   THRESHOLD_LL = 0x04;
+const uint8_t   THRESHOLD_LH = 0x05;
+const uint8_t   THRESHOLD_HL = 0x06;
+const uint8_t   THRESHOLD_HH = 0x07;
+const uint8_t   STATUS = 0x08 ;
+const uint8_t   GREEN_L = 0x09 ;
+const uint8_t   GREEN_H = 0x0A;
+const uint8_t   RED_L = 0x0B;
+const uint8_t   RED_H = 0x0C;
+const uint8_t   BLUE_L = 0x0D;
+const uint8_t   BLUE_H =0x0E;
+
 extern SemaphoreHandle_t RGB_sem ;
+extern SemaphoreHandle_t xSemaphore;
+
 extern QueueHandle_t RGB_Que;
+
 
 void RGBSensorTask(void* pvParameters)
 {
@@ -37,42 +57,34 @@ void RGBSensorTask(void* pvParameters)
 
     #ifndef TEST
     uint8_t read_val;
-    RGB_SENSOR_REG_t reg, reg1, reg2;
+uint8_t reg1,reg2,reg3;
 
-    //reset
-    reg = DEVICE_ID;
-    RGB_SENSOR_WRITE(0x46, reg);
+    RGB_SENSOR_WRITE(0x46, DEVICE_ID);
     SysCtlDelay(1000);
 
-    //check for device id
-    UARTprintf("\nConfig1:%x",RGB_SENSOR_READ(reg));
-
     //configuration
-    reg = CONFIG_1;
-    RGB_SENSOR_WRITE(CFG1_MODE_RGB | CFG1_10KLUX | CFG1_ADC_SYNC_NORMAL, reg); //| CFG1_16BIT
-    UARTprintf("\nConfig1:%x", RGB_SENSOR_READ(reg));
+    RGB_SENSOR_WRITE(CFG1_MODE_RGB | CFG1_10KLUX | CFG1_ADC_SYNC_NORMAL, CONFIG_1); //| CFG1_16BIT
+    UARTprintf("\nConfig1:%x", RGB_SENSOR_READ(CONFIG_1));
 
-    reg = CONFIG_2;
-    RGB_SENSOR_WRITE(CFG2_IR_OFFSET_ON | CFG2_IR_ADJUST_HIGH, reg);
-    UARTprintf("\nConfig2:%x", RGB_SENSOR_READ(reg));
+    RGB_SENSOR_WRITE(CFG2_IR_OFFSET_ON | CFG2_IR_ADJUST_HIGH, CONFIG_2);
+    UARTprintf("\nConfig2:%x", RGB_SENSOR_READ(CONFIG_2));
 
-    reg = CONFIG_3;
     RGB_SENSOR_WRITE(CFG3_R_INT | CFG3_INT_PRST4 | CFG3_RGB_CONV_TO_INT_DISABLE,
-                     reg);
-    UARTprintf("\nConfig3:%x", RGB_SENSOR_READ(reg));
+                     CONFIG_3);
+    UARTprintf("\nConfig3:%x", RGB_SENSOR_READ(CONFIG_3));
 
 //set interrupt threshold
     reg1 = THRESHOLD_LH;
     reg2 = THRESHOLD_LL;
-    RGB_SENSOR_WRITE(0x00, reg1);
-    RGB_SENSOR_WRITE(0x00, reg2);
+    RGB_SENSOR_WRITE(0x00, THRESHOLD_LH);
+    RGB_SENSOR_WRITE(0x00, THRESHOLD_LL);
     UARTprintf("\nThreshold LOW:%x,%x", RGB_SENSOR_READ(reg1),
                RGB_SENSOR_READ(reg2));
 
     reg1 = THRESHOLD_HH;
     reg2 = THRESHOLD_HL;
-    RGB_SENSOR_WRITE(0x00, reg1);
-    RGB_SENSOR_WRITE(0xFF, reg2);
+    RGB_SENSOR_WRITE(0x00, THRESHOLD_HH);
+    RGB_SENSOR_WRITE(0xA0, THRESHOLD_HL);
     UARTprintf("\nThreshold HIGH:%x,%x", RGB_SENSOR_READ(reg1),
                RGB_SENSOR_READ(reg2));
 
@@ -80,6 +92,8 @@ void RGBSensorTask(void* pvParameters)
 
     strcpy(tx_buf->message,"RGB INIT Done");
     tx_buf->msg_type = INIT;
+    tx_buf->msg_val = 1;
+    tx_buf->task_ID = RGB_TASK_ID;
 
     ret =  xQueueSendToFront( RGB_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
     if(ret!= pdPASS)  UARTprintf("Que Full");
@@ -89,30 +103,35 @@ void RGBSensorTask(void* pvParameters)
 #ifndef TEST
         read_val = 69;
 
-        reg = STATUS;
-        UARTprintf("  STATUS:%x", RGB_SENSOR_READ(reg));
+         RGB_SENSOR_READ(STATUS);//clear interrupts
+         tx_buf->msg_type = LOG;
 
-        reg1 = RED_H;
-        reg2 = RED_L;
-        UARTprintf("  RED:%x,%x", RGB_SENSOR_READ(reg1), RGB_SENSOR_READ(reg2));
-
-        reg1 = GREEN_H;
-        reg2 = GREEN_L;
-        UARTprintf("  GREEN:%x,%x", RGB_SENSOR_READ(reg1),
-                   RGB_SENSOR_READ(reg2));
-
-        reg1 = BLUE_H;
-        reg2 = BLUE_L;
-        UARTprintf("  BLUE:%x,%x", RGB_SENSOR_READ(reg1),
-                   RGB_SENSOR_READ(reg2));
-#else
-        strcpy(tx_buf->message,"RGB Sensor data");
-        tx_buf->msg_type = LOG;
+        reg1 = RGB_SENSOR_READ(GREEN_H);
+        reg2 = RGB_SENSOR_READ(GREEN_L);
+        UARTprintf("  GREEN:%x,%x",reg1 , reg2);
+        strcpy(tx_buf->message,"GREEN");
+        tx_buf->msg_val = reg2;
         ret =  xQueueSendToBack( RGB_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
         if(ret!= pdPASS)  UARTprintf("Que Full");
 
-#endif
+        reg1 = RGB_SENSOR_READ(BLUE_H);
+        reg2 = RGB_SENSOR_READ(BLUE_L);
+        UARTprintf("  BLUE:%x,%x",reg1 , reg2);
+        strcpy(tx_buf->message,"BLUE");
+        tx_buf->msg_val = reg2;
+        ret =  xQueueSendToBack( RGB_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
+        if(ret!= pdPASS)  UARTprintf("Que Full");
 
+
+        reg1 = RGB_SENSOR_READ(RED_H);
+        reg2 = RGB_SENSOR_READ(RED_L);
+        UARTprintf("  RED:%x,%x",reg1 , reg2);
+        strcpy(tx_buf->message,"Red");
+        tx_buf->msg_val = reg2;
+        UARTprintf("\n");
+#endif
+        ret =  xQueueSendToBack( RGB_Que,(void *)tx_buf,pdMS_TO_TICKS(3000));
+        if(ret!= pdPASS)  UARTprintf("Que Full");
 
         vTaskDelay(pdMS_TO_TICKS(2000));
     }

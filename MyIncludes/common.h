@@ -40,9 +40,10 @@
 
 
 typedef struct {
-  uint32_t dev_ID;
-  //uint32_t task_ID;
-  uint32_t msg_type;
+  uint8_t dev_ID;
+  uint8_t task_ID;
+  uint8_t msg_type;
+  uint8_t msg_val;
   char message[20];
 } msg_struct;
 

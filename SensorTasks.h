@@ -27,24 +27,6 @@
 #define RGB_SENSOR_READ(reg)               I2C0_Master_Read(RGB_SENSOR_ADDRESS,reg)
 
 
-typedef enum{
-    DEVICE_ID = 0x00,
-    CONFIG_1 = 0x01,
-    CONFIG_2 = 0x02,
-    CONFIG_3 = 0x03,
-    THRESHOLD_LL = 0x04,
-    THRESHOLD_LH = 0x05,
-    THRESHOLD_HL = 0x06,
-    THRESHOLD_HH = 0x07,
-    STATUS = 0x08 ,
-    GREEN_L = 0x09 ,
-    GREEN_H = 0x0A,
-    RED_L = 0x0B,
-    RED_H = 0x0C,
-    BLUE_L = 0x0D,
-    BLUE_H =0x0E
-}RGB_SENSOR_REG_t;
-
 // Configuration Settings
 #define CFG_DEFAULT 0x00
 
