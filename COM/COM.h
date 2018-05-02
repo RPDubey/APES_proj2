@@ -8,7 +8,7 @@
 #ifndef MYINCLUDES_COM_H_
 #define MYINCLUDES_COM_H_
 
-#define PORT 10000
+#define PORT 1000
 
 void SocketServerTask(void* pvParameters);
 

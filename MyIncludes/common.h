@@ -10,8 +10,8 @@
 
 #include<stdint.h>
 /*************** Compile time switches ***********************/
-//#define USE_SOCKET
-#define USE_UART
+#define USE_SOCKET
+//#define USE_UART
 
 //#define TEST
 /************************************************************/
@@ -22,7 +22,7 @@
 
 #define MAX_QUE_SIZE 10
 
-#define SERVER_IP_ADDRESS   FreeRTOS_inet_addr_quick(192,168,1,15)
+#define SERVER_IP_ADDRESS   FreeRTOS_inet_addr_quick(192,168,1,7)
 #define DEFAULT_SERVER_IP_ADDRESS   FreeRTOS_inet_addr_quick(192,168,1,35)
 
 
